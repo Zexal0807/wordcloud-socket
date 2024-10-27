@@ -1,4 +1,3 @@
-// app/page.js
 import Link from "next/link";
 
 export default function Home() {
@@ -6,10 +5,12 @@ export default function Home() {
 		<div style={{ padding: "20px" }}>
 			<h1>Word Cloud Realtime</h1>
 			<nav>
-				<Link href="/sender" style={{ marginRight: "20px" }}>
-					Vai a Sender
+				<Link href="/sender/12345678" style={{ marginRight: "20px" }}>
+					Vai a Sender 12345678
 				</Link>
-				<Link href="/viewer">Vai a Viewer</Link>
+				<Link href="/viewer/12345678">
+					Vai a Viewer 12345678
+				</Link>
 			</nav>
 		</div>
 	);
