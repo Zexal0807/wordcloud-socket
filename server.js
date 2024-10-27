@@ -41,6 +41,15 @@ app.prepare().then(() => {
 				senders: [],
 				viewers: []
 			},
+		},
+		'1': {
+			id: "1",
+			title: "CIAO",
+			questions: [],
+			clients: {
+				senders: [],
+				viewers: []
+			},
 		}
 	};
 
@@ -93,21 +102,21 @@ app.prepare().then(() => {
 			}
 		});
 
-		socket.on("leave", (clientInfo) => {
-			const { type, idSession } = clientInfo;
-			const session = sessions[idSession];
+		socket.on("disconnecting", (clientInfo) => {
+			debugger;
+			let its = socket.rooms.values();
+			its.next()
+			const idSession = its.next().value;
+			if (idSession) {
+				const session = sessions[idSession];
 
-			if (type == "sender") {
 				session.clients.senders = session.clients.senders.filter((client) => client.id != socket.id);
-			}
-			if (type == "viewer") {
 				session.clients.viewers = session.clients.viewers.filter((client) => client.id != socket.id);
+
+				console.log(`Client ${socket.id} disconnesso dalla sessione ${idSession}`);
+				saveSessionToFile(idSession);
 			}
-
-			console.log(`Client ${socket.id} disconnesso dalla sessione ${idSession}`);
-			saveSessionToFile(idSession);
 		});
-
 
 		// Gestione dell'invio di una nuova parola da un sender
 		/*

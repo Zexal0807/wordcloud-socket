@@ -23,7 +23,6 @@ const Viewer = () => {
 				.then(async (d) => {
 					d = await d.json();
 					setData(d);
-					setSocket(io("http://localhost:3000"));
 				})
 				.catch((e) => {
 					console.log("SESSIONE NON TROVATA");
@@ -31,6 +30,9 @@ const Viewer = () => {
 				});
 		};
 		fetchData();
+		
+		if (!socket)
+			setSocket(io("http://localhost:3000"));
 	}, []);
 
 	useEffect(() => {
@@ -46,7 +48,8 @@ const Viewer = () => {
 		// Other socket events
 
 		return () => {
-			if (socket) socket.emit("leave", { type: "viewer", idSession });
+			debugger;
+			if (socket) socket.disconnect()
 		};
 	}, [socket]);
 

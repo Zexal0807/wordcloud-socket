@@ -36,7 +36,8 @@ const Sender = () => {
 
 	const join = () => {
 		if (data.id == "" || name == "") return;
-		setSocket(io("http://localhost:3000"));
+		if (!socket)
+			setSocket(io("http://localhost:3000"));
 	};
 
 	useEffect(() => {
@@ -53,7 +54,8 @@ const Sender = () => {
 		// Other socket events
 		
 		return () => {
-			if (socket) socket.emit("leave", { type: "sender", name, idSession });
+			debugger;
+			if (socket) socket.disconnect()
 		};
 	}, [socket]);
 
