@@ -87,7 +87,12 @@ app.prepare().then(() => {
 
 				console.log(`Viewer aggiunto alla sessione ${idSession}`);
 
-				return saveAndCallback({ status: true, msg: "ok" });
+				return saveAndCallback({
+					status: true,
+					msg: "ok",
+					questions: session.questions,
+					senders: session.clients.senders
+				});
 			}
 			if (type == "sender") {
 				if (session.clients.senders.length >= 50) {
@@ -95,15 +100,18 @@ app.prepare().then(() => {
 				}
 
 				console.log(`Sender ${clientInfo.name} aggiunto alla sessione ${idSession}`);
+				let sender = { id: socket.id, name: clientInfo.name }
 
-				session.clients.senders.push({ id: socket.id, name: clientInfo.name });
+				session.clients.senders.push(sender);
 				socket.join(idSession);
+
+				socket.to(idSession).emit("join", sender);
+
 				return saveAndCallback({ status: true, msg: "ok" });
 			}
 		});
 
-		socket.on("disconnecting", (clientInfo) => {
-			debugger;
+		socket.on("disconnecting", (reason) => {
 			let its = socket.rooms.values();
 			its.next()
 			const idSession = its.next().value;
@@ -112,6 +120,8 @@ app.prepare().then(() => {
 
 				session.clients.senders = session.clients.senders.filter((client) => client.id != socket.id);
 				session.clients.viewers = session.clients.viewers.filter((client) => client.id != socket.id);
+
+				socket.to(idSession).emit("leave", socket.id);
 
 				console.log(`Client ${socket.id} disconnesso dalla sessione ${idSession}`);
 				saveSessionToFile(idSession);
@@ -137,7 +147,10 @@ app.prepare().then(() => {
 		if (session == undefined)
 			res.sendStatus(404)
 		else
-			res.json(session);
+			res.json({
+				id: session.id,
+				title: session.title
+			});
 	});
 
 	// Gestisci tutte le richieste con Next.js

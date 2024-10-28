@@ -8,7 +8,7 @@ const Sender = () => {
 	const params = useParams();
 	const { idSession } = params;
 
-	const [data, setData] = useState({ id: "", title: "" });
+	const [data, setData] = useState({ title: null });
 
 	const STATE_NOT_CONNECTED = 0;
 	const STATE_SESSION_FULL = 1;
@@ -21,21 +21,23 @@ const Sender = () => {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			await fetch(`./../api/session/${idSession}`)
-				.then(async (d) => {
-					d = await d.json();
-					setData(d);
-				})
-				.catch((e) => {
-					console.log("SESSIONE NON TROVATA");
-					redirect("/?not-found");
-				});
+			try{
+				const response = await fetch(`./../api/session/${idSession}`);
+				if(response.ok){
+					const d = await response.json();
+					setData({...d});
+				}
+			}catch(e) {
+				console.log("SESSIONE NON TROVATA");
+				redirect("/?not-found");
+			}
 		};
+
 		fetchData();
 	}, []);
 
 	const join = () => {
-		if (data.id == "" || name == "") return;
+		if (name == "") return;
 		if (!socket)
 			setSocket(io("http://localhost:3000"));
 	};
