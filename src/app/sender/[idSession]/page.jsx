@@ -10,24 +10,19 @@ const Sender = () => {
 
 	const [data, setData] = useState({ title: null });
 
-	const STATE_NOT_CONNECTED = 0;
-	const STATE_SESSION_FULL = 1;
-	const STATE_CONNECTED = 2;
-
-	const [sessionState, setSessionState] = useState(STATE_NOT_CONNECTED);
 	const [name, setName] = useState("");
 
 	const [socket, setSocket] = useState();
 
 	useEffect(() => {
 		const fetchData = async () => {
-			try{
+			try {
 				const response = await fetch(`./../api/session/${idSession}`);
-				if(response.ok){
+				if (response.ok) {
 					const d = await response.json();
-					setData({...d});
+					setData({ ...d });
 				}
-			}catch(e) {
+			} catch (e) {
 				console.log("SESSIONE NON TROVATA");
 				redirect("/?not-found");
 			}
@@ -38,30 +33,32 @@ const Sender = () => {
 
 	const join = () => {
 		if (name == "") return;
-		if (!socket)
+		if (!socket) 
 			setSocket(io("http://localhost:3000"));
 	};
 
 	useEffect(() => {
-		if (!socket) return;
+		if (!socket) 
+			return;
 
 		socket.emit("join-session", idSession, { type: "sender", name }, (res) => {
-				if (res.status) setSessionState(STATE_CONNECTED);
-				if (!res.status) {
-					if (res.msg == "full") setSessionState(STATE_SESSION_FULL);
+			if (!res.status) {
+				if (res.msg == "full") {
+					console.log("SESSIONE NON TROVATA");
+					redirect("/?full");
 				}
 			}
-		);
+		});
 
 		// Other socket events
-		
+
 		return () => {
-			debugger;
-			if (socket) socket.disconnect()
+			if (socket) 
+				socket.disconnect();
 		};
 	}, [socket]);
 
-	if (sessionState == STATE_NOT_CONNECTED)
+	if (!socket)
 		return (
 			<div>
 				<input value={name} onChange={(e) => setName(e.target.value)} />
@@ -69,8 +66,6 @@ const Sender = () => {
 			</div>
 		);
 
-	if (sessionState == STATE_SESSION_FULL)
-		return <div>La sessione è piena</div>;
 
 	/*
 	const [newWord, setNewWord] = useState("");
@@ -83,7 +78,7 @@ const Sender = () => {
 		}
 	};
 */
-	if (sessionState == STATE_CONNECTED) return <div>{data.title}</div>;
+	return <div>{data.title}</div>;
 	/*
 		return (
 			<div style={{ textAlign: "center", marginTop: "50px" }}>

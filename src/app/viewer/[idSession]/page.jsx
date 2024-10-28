@@ -9,22 +9,17 @@ const Viewer = () => {
 
 	const [data, setData] = useState({ title: null });
 
-	const STATE_NOT_CONNECTED = 0;
-	const STATE_CONNECTED = 2;
-
-	const [sessionState, setSessionState] = useState(STATE_NOT_CONNECTED);
-
 	const [socket, setSocket] = useState(null);
 
 	useEffect(() => {
 		const fetchData = async () => {
-			try{
+			try {
 				const response = await fetch(`./../api/session/${idSession}`);
-				if(response.ok){
+				if (response.ok) {
 					const d = await response.json();
-					setData({...d, senders:[], questions:[]});
+					setData({ ...d, senders: [], questions: [] });
 				}
-			}catch(e) {
+			} catch (e) {
 				console.log("SESSIONE NON TROVATA");
 				redirect("/?not-found");
 			}
@@ -34,20 +29,28 @@ const Viewer = () => {
 	}, []);
 
 	useEffect(() => {
-		if (!data.title) return;
+		if (!data.title) 
+			return;
 
-		if(socket) return;
+		if (socket) 
+			return;
 
 		const socketInstance = io("http://localhost:3000");
 		setSocket(socketInstance);
 
 		socketInstance.emit("join-session", idSession, { type: "viewer" }, (res) => {
 			if (!res.status) {
-				if (res.msg == "full") setSessionState(STATE_SESSION_FULL);
+				if (res.msg == "full") {
+					console.log("SESSIONE NON TROVATA");
+					redirect("/?full");
+				}
 			}
 			if (res.status) {
-				setSessionState(STATE_CONNECTED);
-				setData((d) => ({...d, senders:res.senders, questions:res.questions}));
+				setData((d) => ({
+					...d,
+					senders: res.senders,
+					questions: res.questions,
+				}));
 			}
 		});
 
@@ -61,26 +64,26 @@ const Viewer = () => {
 		socketInstance.on("leave", (res) => {
 			setData((d) => ({
 				...d,
-				senders: [...d.senders.filter(sender => sender.id != res)],
+				senders: [...d.senders.filter((sender) => sender.id != res)],
 			}));
 		});
 
 		// Other socket events
 
 		return () => {
-			debugger;
-			if (socket) socket.disconnect();
+			if (socket) 
+				socket.disconnect();
 		};
 	}, [data.title]);
 
-	if (sessionState == STATE_NOT_CONNECTED) return <div>NON CONNESSO</div>;
-	if (sessionState == STATE_CONNECTED)
-		return (
-			<div>
-				<h2>{data.title}</h2>
-				<h5>Connessi: {data.senders.map(s => s.name)}</h5>
-			</div>
-		);
+	if (!socket) return <div>NON CONNESSO</div>;
+
+	return (
+		<div>
+			<h2>{data.title}</h2>
+			<h5>Connessi: {data.senders.map((s) => s.name)}</h5>
+		</div>
+	);
 };
 
 export default Viewer;
