@@ -16,10 +16,9 @@ app.prepare().then(() => {
 	const server = express();
 	const httpServer = createServer(server);
 
-	// Inizializza Socket.IO sul server HTTP
 	const io = new Server(httpServer, {
 		cors: {
-			origin: "*", // Configura il CORS se necessario
+			origin: "*",
 			methods: ["GET", "POST"],
 		},
 	});
@@ -76,11 +75,10 @@ app.prepare().then(() => {
 			const session = sessions[idSession];
 			const { type } = clientInfo;
 
-			const saveAndCallback = (callbackData) => {
-				// Salva la sessione ogni volta che un client si unisce
-				saveSessionToFile(idSession);
-				return callback(callbackData);
-			}
+			socket.type = type;
+			socket.idSession = idSession;
+
+			let callbackData = {}
 
 			if (type == "viewer") {
 				session.clients.viewers.push({ id: socket.id });
@@ -88,40 +86,37 @@ app.prepare().then(() => {
 
 				console.log(`Viewer aggiunto alla sessione ${idSession}`);
 
-				socket.type = "viewer";
-				socket.idSession = idSession;
-
-				return saveAndCallback({
+				callbackData = {
 					status: true,
 					msg: "ok",
 					questions: session.questions,
 					senders: session.clients.senders
-				});
+				};
 			}
 			if (type == "sender") {
 				if (session.clients.senders.length >= 50) {
 					return callback({ status: false, msg: "full" });
 				}
 
-				console.log(`Sender ${clientInfo.name} aggiunto alla sessione ${idSession}`);
-
-				socket.type = "sender";
-				socket.idSession = idSession;
 				socket.name = clientInfo.name;
-
 				let sender = { id: socket.id, name: socket.name }
 
 				session.clients.senders.push(sender);
 				socket.join(idSession);
 
+				console.log(`Sender ${clientInfo.name} aggiunto alla sessione ${idSession}`);
+
 				socket.to(idSession).emit("sender join", sender);
 
-				return saveAndCallback({
+				callbackData = {
 					status: true,
 					msg: "ok",
 					question: session.question != null ? session.questions[session.question] : null
-				});
+				};
 			}
+
+			saveSessionToFile(idSession);
+			return callback(callbackData);
 		});
 
 		socket.on("disconnecting", (reason) => {
@@ -134,7 +129,7 @@ app.prepare().then(() => {
 
 			if (type == "viewer") {
 				session.clients.viewers = session.clients.viewers.filter((client) => client.id != socket.id);
-				socket.to(idSession).emit("viewer left", socket.id)
+				// socket.to(idSession).emit("viewer left", socket.id)
 			}
 			if (type == "sender") {
 				session.clients.senders = session.clients.senders.filter((client) => client.id != socket.id);
@@ -152,29 +147,41 @@ app.prepare().then(() => {
 			session.question = idQuestion;
 
 			if (session) {
-				let question = {...session.questions[idQuestion] }
-				question.idQuestion = idQuestion;
-				question.answers = null;
+				io.to(idSession).emit("change question", {
+					...session.questions[idQuestion],
+					idQuestion,
+					answers: null
+				});
+			}
+		});
 
-				io.to(idSession).emit("change question", question);
-			}
-		});
-		/*
-		socket.on("send answer", ({ idQuesion, answer }) => {
-			debugger;
-		
+		socket.on("send answer", ({ idQuestion, answer }) => {
+			const { id, idSession, name } = socket;
 			const session = sessions[idSession];
-			if (session) {
-				// session.words.push(word);
-				io.to(idSession).emit("send answer", { id, ans });
+
+			if (!session)
+				return;
+
+			if (idQuestion != session.question)
+				return
+
+			let a = {
+				date: (new Date()).toJSON(),
+				answer,
+				sender: { id, name }
 			}
+
+			session.questions[idQuestion].answers.push(a)
+			io.to(idSession).emit("send answer", { idQuestion, data: a });
+			saveSessionToFile(idSession);
 		});
-		*/
+
 	});
 
 	server.get("/api/session/:idSession", (req, res) => {
 		const idSession = req.params.idSession;
 		const session = sessions[idSession];
+
 		if (session == undefined)
 			res.sendStatus(404)
 		else

@@ -79,12 +79,20 @@ const Viewer = () => {
 			}));
 		});
 
-		// socketInstance.on("send answer", ({id, ans}) => {
-		// 	setData((d) => {
-		// 		d.questions[id].answers = [...d.questions[id].answers, ans]
-		// 		return d
-		// 	});
-		// });
+		socketInstance.on("send answer", ({ idQuestion, data }) => {
+			setData((d) => {
+				let u = [...d.questions];
+				u[idQuestion] = {
+					...u[idQuestion],
+					answers: [
+						...u[idQuestion].answers,
+						data
+					]
+				}
+				return { ...d, questions: u}
+			});
+		});
+
 		// Other socket events
 
 		return () => {

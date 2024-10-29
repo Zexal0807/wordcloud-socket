@@ -70,9 +70,7 @@ const Sender = () => {
 			}
 		});
 
-		socket.on("viewver left", (res) => {
-			
-		});
+		// socket.on("viewver left", (res) => { });
 
 		socket.on("change question", (question) => {
 			setQuestion(question);
@@ -88,7 +86,7 @@ const Sender = () => {
 	}, [socket]);
 
 	const sendAnswer = (answer) => {
-		socket.emit("send answer", { idQuestion: question.id, answer })
+		socket.emit("send answer", { idQuestion: question.idQuestion, answer })
 		if (!question.multipla) { 
 			setStatus(STATUS_WAITING_NEXT_QUESTION);
 		}
