@@ -23,54 +23,33 @@ app.prepare().then(() => {
 		},
 	});
 
-	// In-memory storage per le sessioni
-	const sessions = {
-		'12345678': {
-			id: "12345678",
-			title: "CIAO",
-			question: null,
-			questions: [{
-				type: "quiz",
-				multiple: false,
-				question: "Scegli",
-				a: { text: "A" },
-				b: { text: "A" },
-				c: { text: "A" },
-				d: { text: "A" },
-				answers: []
-			}],
-			clients: {
-				senders: [],
-				viewers: []
-			},
-		},
-		'1': {
-			id: "1",
-			title: "CIAO",
-			questions: [],
-			clients: {
-				senders: [],
-				viewers: []
-			},
-		}
-	};
+	const sessions = {};
 
-	// Funzione per salvare la sessione su un file JSON
 	const saveSessionToFile = (idSession) => {
 		const sessionData = sessions[idSession];
 		const filePath = path.join(__dirname, "sessions", `${idSession}.json`);
-		// Crea la cartella sessions se non esiste
 		if (!fs.existsSync(path.join(__dirname, "sessions"))) {
 			fs.mkdirSync(path.join(__dirname, "sessions"));
 		}
-		// Scrivi i dati della sessione nel file JSON
 		fs.writeFileSync(filePath, JSON.stringify(sessionData, null, 2), "utf-8");
 	};
+
+	const loadQuiz = (idQuiz) => {
+		const filePath = path.join(__dirname, "quiz", `${idQuiz}.json`);
+		let quiz = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+		quiz.question = null;
+		quiz.questions.map(q => ({ ...q, answers: [] }));
+		quiz.clients = { viewers: [], senders: [] };
+		quiz.id = Math.floor(Math.random() * (99999999 - 10000000) + 10000000);
+
+		sessions[quiz.id] = quiz;
+
+		return quiz;
+	}
 
 	io.on("connection", (socket) => {
 		console.log("Client connesso");
 
-		// Un client si unisce a una sessione specifica
 		socket.on("join-session", (idSession, clientInfo, callback) => {
 			const session = sessions[idSession];
 			const { type } = clientInfo;
@@ -129,8 +108,11 @@ app.prepare().then(() => {
 
 			if (type == "viewer") {
 				session.clients.viewers = session.clients.viewers.filter((client) => client.id != socket.id);
-				// socket.to(idSession).emit("viewer left", socket.id)
+				socket.to(idSession).emit("viewer left")
 				console.log(`Viewer ${socket.id} disconnesso dalla sessione ${idSession}`);
+				saveSessionToFile(idSession);
+				delete sessions[idSession];
+				return;
 			}
 			if (type == "sender") {
 				session.clients.senders = session.clients.senders.filter((client) => client.id != socket.id);
@@ -191,6 +173,14 @@ app.prepare().then(() => {
 				title: session.title
 			});
 	});
+
+	server.get("/api/quiz/:idQuiz/start", (req, res) => {
+		const idQuiz = req.params.idQuiz;
+
+		let quiz = loadQuiz(idQuiz);
+		res.json(quiz);
+	});
+
 
 	// Gestisci tutte le richieste con Next.js
 	server.all("*", (req, res) => {

@@ -89,11 +89,9 @@ const Viewer = () => {
 						data
 					]
 				}
-				return { ...d, questions: u}
+				return { ...d, questions: u};
 			});
 		});
-
-		// Other socket events
 
 		return () => {
 			if (socket) 
@@ -108,7 +106,7 @@ const Viewer = () => {
 		if(index < 0 )
 			setStatus(STATUS_WAITING_SENDERS);
 		else
-			setStatus(STATUS_ANSWERING)
+			setStatus(STATUS_ANSWERING);
 	};
 
 	const waitPage = () => {

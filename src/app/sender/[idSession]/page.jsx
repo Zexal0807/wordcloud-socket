@@ -20,7 +20,7 @@ const Sender = () => {
 	const STATUS_LOGGING = "logging";
 	const STATUS_WAITING_VIEWER = "waiting";
 	const STATUS_ANSWERING = "answering";
-	const STATUS_WAITING_NEXT_QUESTION = "waitingquestion"
+	const STATUS_WAITING_NEXT_QUESTION = "waitingquestion";
 	const [status, setStatus] = useState(STATUS_INITIAL);
 
 	useEffect(() => {
@@ -70,14 +70,14 @@ const Sender = () => {
 			}
 		});
 
-		// socket.on("viewver left", (res) => { });
+		socket.on("viewer left", (res) => { 
+			redirect("/?error=end");
+		});
 
 		socket.on("change question", (question) => {
 			setQuestion(question);
 			setStatus(STATUS_ANSWERING);
 		});
-
-		// Other socket events
 
 		return () => {
 			if (socket) 
@@ -138,7 +138,7 @@ const Sender = () => {
 		case STATUS_ANSWERING:
 			return questionPage();
 		case STATUS_WAITING_NEXT_QUESTION:
-			return waitingNextPage()
+			return waitingNextPage();
 		default:
 			return <div>BO</div>;
 	}
