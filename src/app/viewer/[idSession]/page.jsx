@@ -11,6 +11,13 @@ const Viewer = () => {
 
 	const [socket, setSocket] = useState(null);
 
+	const [question, setQuestion] = useState(-1);
+
+	const STATUS_INITIAL = "initial";
+	const STATUS_WAITING_SENDERS = "waiting";
+	const STATUS_ANSWERING = "answering";
+	const [status, setStatus] = useState(STATUS_INITIAL);
+
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -54,6 +61,7 @@ const Viewer = () => {
 					senders: res.senders,
 					questions: res.questions,
 				}));
+				setStatus(STATUS_WAITING_SENDERS);
 			}
 		});
 
@@ -71,6 +79,12 @@ const Viewer = () => {
 			}));
 		});
 
+		// socketInstance.on("send answer", ({id, ans}) => {
+		// 	setData((d) => {
+		// 		d.questions[id].answers = [...d.questions[id].answers, ans]
+		// 		return d
+		// 	});
+		// });
 		// Other socket events
 
 		return () => {
@@ -79,14 +93,68 @@ const Viewer = () => {
 		};
 	}, [data.title]);
 
-	if (!socket) return <div>NON CONNESSO</div>;
 
-	return (
-		<div>
-			<h2>{data.title}</h2>
-			<h5>Connessi: {data.senders.map((s) => s.name)}</h5>
-		</div>
-	);
+	const updateQuestion = (index) => {
+		socket.emit("change question", index);
+		setQuestion(index);
+		if(index < 0 )
+			setStatus(STATUS_WAITING_SENDERS);
+		else
+			setStatus(STATUS_ANSWERING)
+	};
+
+	const waitPage = () => {
+		return (<div>
+				<h2>{data.title}</h2>
+				<h5>Connessi: {data.senders.map((s) => s.name)}</h5>
+				<>Attendiamo che entrino tutti</>
+					<button
+						onClick={() => {
+							updateQuestion(0);
+						}}
+					>
+						INZIA
+					</button>
+			</div>
+		);
+	};
+
+	const questionPage = () => {
+		return (
+			<div>
+				<button
+					onClick={() => {
+						updateQuestion(question - 1);
+					}}
+				>
+					PREC
+				</button>
+
+				{data.questions[question].type}
+
+				<button
+					onClick={() => {
+						updateQuestion(question + 1);
+					}}
+				>
+					NEXT
+				</button>
+
+
+				{JSON.stringify(data.questions[question])}
+
+			</div>
+		);
+	};
+
+	switch (status) {
+		case STATUS_WAITING_SENDERS:
+			return waitPage();
+		case STATUS_ANSWERING:
+			return questionPage();
+		default:
+			return <div>NON CONNESSO</div>
+	}
 };
 
 export default Viewer;

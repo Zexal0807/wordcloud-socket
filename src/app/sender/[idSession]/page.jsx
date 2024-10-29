@@ -14,6 +14,15 @@ const Sender = () => {
 
 	const [socket, setSocket] = useState();
 
+	const [question, setQuestion] = useState(null);
+
+	const STATUS_INITIAL = "initial";
+	const STATUS_LOGGING = "logging";
+	const STATUS_WAITING_VIEWER = "waiting";
+	const STATUS_ANSWERING = "answering";
+	const STATUS_WAITING_NEXT_QUESTION = "waitingquestion"
+	const [status, setStatus] = useState(STATUS_INITIAL);
+
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -21,6 +30,7 @@ const Sender = () => {
 				if (response.ok) {
 					const d = await response.json();
 					setData({ ...d });
+					setStatus(STATUS_LOGGING);
 				} else if (response.status === 404) {
 					console.log("SESSIONE NON TROVATA");
 					redirect("/?error=not-found");
@@ -52,6 +62,21 @@ const Sender = () => {
 					redirect("/?error=full");
 				}
 			}
+			if (res.question) {
+				setStatus(STATUS_ANSWERING);
+				setQuestion(res.question);
+			} else {
+				setStatus(STATUS_WAITING_VIEWER);
+			}
+		});
+
+		socket.on("viewver left", (res) => {
+			
+		});
+
+		socket.on("change question", (question) => {
+			setQuestion(question);
+			setStatus(STATUS_ANSWERING);
 		});
 
 		// Other socket events
@@ -62,48 +87,63 @@ const Sender = () => {
 		};
 	}, [socket]);
 
-	if (!socket)
+	const sendAnswer = (answer) => {
+		socket.emit("send answer", { idQuestion: question.id, answer })
+		if (!question.multipla) { 
+			setStatus(STATUS_WAITING_NEXT_QUESTION);
+		}
+	}
+
+	const loggingPage = () => {
 		return (
 			<div>
 				<input value={name} onChange={(e) => setName(e.target.value)} />
 				<button onClick={join}>ENTRA</button>
 			</div>
 		);
+	}
 
+	const questionPage = () => {
+		return <div>
+			{question.question}
 
-	/*
-	const [newWord, setNewWord] = useState("");
-
-	const handleSubmit = (e) => {
-		e.preventDefault();
-		if (newWord) {
-			socket.emit("newWord", newWord); // Invia la parola al server
-			setNewWord(""); // Resetta l'input
-		}
+			<button
+				onClick={() => {sendAnswer(1)}}
+			>RISPOSTA a</button>	
+			
+		</div>;
 	};
-*/
-	return <div>{data.title}</div>;
-	/*
+
+	const waitingPage = () => {
 		return (
-			<div style={{ textAlign: "center", marginTop: "50px" }}>
-				<h1>Invia una Parola</h1>
-				<form onSubmit={handleSubmit}>
-					<input
-						type="text"
-						value={newWord}
-						onChange={(e) => setNewWord(e.target.value)}
-						placeholder="Inserisci una parola"
-						style={{ padding: "10px", fontSize: "16px" }}
-					/>
-					<button
-						type="submit"
-						style={{ padding: "10px", fontSize: "16px" }}
-					>
-						Invia
-					</button>
-				</form>
+			<div>
+				{data.title}
+				sei in attesa che l host inizi
 			</div>
-		);*/
+		);
+	};
+
+	const waitingNextPage = () => {
+		return (
+			<div>
+				{data.title}
+				Attendiao che tutti rispondano
+			</div>
+		);
+	};
+
+	switch(status){
+		case STATUS_LOGGING:
+			return loggingPage();
+		case STATUS_WAITING_VIEWER:
+			return waitingPage();
+		case STATUS_ANSWERING:
+			return questionPage();
+		case STATUS_WAITING_NEXT_QUESTION:
+			return waitingNextPage()
+		default:
+			return <div>BO</div>;
+	}
 };
 
 export default Sender;

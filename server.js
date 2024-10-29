@@ -29,13 +29,16 @@ app.prepare().then(() => {
 		'12345678': {
 			id: "12345678",
 			title: "CIAO",
+			question: null,
 			questions: [{
 				type: "quiz",
+				multiple: false,
 				question: "Scegli",
-				a: { text: "A", correct: false },
-				b: { text: "A", correct: false },
-				c: { text: "A", correct: true },
-				d: { text: "A", correct: false }
+				a: { text: "A" },
+				b: { text: "A" },
+				c: { text: "A" },
+				d: { text: "A" },
+				answers: []
 			}],
 			clients: {
 				senders: [],
@@ -113,7 +116,11 @@ app.prepare().then(() => {
 
 				socket.to(idSession).emit("sender join", sender);
 
-				return saveAndCallback({ status: true, msg: "ok" });
+				return saveAndCallback({
+					status: true,
+					msg: "ok",
+					question: session.question != null ? session.questions[session.question] : null
+				});
 			}
 		});
 
@@ -123,7 +130,7 @@ app.prepare().then(() => {
 			if (!idSession)
 				return;
 
-				const session = sessions[idSession];
+			const session = sessions[idSession];
 
 			if (type == "viewer") {
 				session.clients.viewers = session.clients.viewers.filter((client) => client.id != socket.id);
@@ -134,13 +141,32 @@ app.prepare().then(() => {
 				socket.to(idSession).emit("sender left", socket.id);
 			}
 
-				console.log(`Client ${socket.id} disconnesso dalla sessione ${idSession}`);
-				saveSessionToFile(idSession);
+			console.log(`Client ${socket.id} disconnesso dalla sessione ${idSession}`);
+			saveSessionToFile(idSession);
 		});
+
+		socket.on("change question", (idQuestion) => {
+			const { idSession } = socket;
+
+			const session = sessions[idSession];
+			session.question = idQuestion;
+
 			if (session) {
-				session.words.push(word);
-				io.to(sessionId).emit("update-cloud", word); // Trasmette solo nella stanza della sessione
-				saveSessionToFile(sessionId); // Aggiorna il file JSON ogni volta che viene aggiunta una parola
+				let question = {...session.questions[idQuestion] }
+				question.idQuestion = idQuestion;
+				question.answers = null;
+
+				io.to(idSession).emit("change question", question);
+			}
+		});
+		/*
+		socket.on("send answer", ({ idQuesion, answer }) => {
+			debugger;
+		
+			const session = sessions[idSession];
+			if (session) {
+				// session.words.push(word);
+				io.to(idSession).emit("send answer", { id, ans });
 			}
 		});
 		*/
