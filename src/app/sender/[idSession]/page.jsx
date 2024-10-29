@@ -21,10 +21,13 @@ const Sender = () => {
 				if (response.ok) {
 					const d = await response.json();
 					setData({ ...d });
+				} else if (response.status === 404) {
+					console.log("SESSIONE NON TROVATA");
+					redirect("/?error=not-found");
 				}
 			} catch (e) {
-				console.log("SESSIONE NON TROVATA");
-				redirect("/?not-found");
+				console.log("Errore di rete o altro:", e);
+				redirect("/?error=505");
 			}
 		};
 
@@ -32,7 +35,8 @@ const Sender = () => {
 	}, []);
 
 	const join = () => {
-		if (name == "") return;
+		if (name == "") 
+			return;
 		if (!socket) 
 			setSocket(io("http://localhost:3000"));
 	};
@@ -45,7 +49,7 @@ const Sender = () => {
 			if (!res.status) {
 				if (res.msg == "full") {
 					console.log("SESSIONE NON TROVATA");
-					redirect("/?full");
+					redirect("/?error=full");
 				}
 			}
 		});

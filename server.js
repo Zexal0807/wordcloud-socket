@@ -82,10 +82,11 @@ app.prepare().then(() => {
 			if (type == "viewer") {
 				session.clients.viewers.push({ id: socket.id });
 				socket.join(idSession);
-				// Invia le parole della sessione corrente al client appena connesso
-				// socket.emit("session-words", session.words);
 
 				console.log(`Viewer aggiunto alla sessione ${idSession}`);
+
+				socket.type = "viewer";
+				socket.idSession = idSession;
 
 				return saveAndCallback({
 					status: true,
@@ -100,38 +101,42 @@ app.prepare().then(() => {
 				}
 
 				console.log(`Sender ${clientInfo.name} aggiunto alla sessione ${idSession}`);
-				let sender = { id: socket.id, name: clientInfo.name }
+
+				socket.type = "sender";
+				socket.idSession = idSession;
+				socket.name = clientInfo.name;
+
+				let sender = { id: socket.id, name: socket.name }
 
 				session.clients.senders.push(sender);
 				socket.join(idSession);
 
-				socket.to(idSession).emit("join", sender);
+				socket.to(idSession).emit("sender join", sender);
 
 				return saveAndCallback({ status: true, msg: "ok" });
 			}
 		});
 
 		socket.on("disconnecting", (reason) => {
-			let its = socket.rooms.values();
-			its.next()
-			const idSession = its.next().value;
-			if (idSession) {
+			const { idSession, type } = socket;
+
+			if (!idSession)
+				return;
+
 				const session = sessions[idSession];
 
-				session.clients.senders = session.clients.senders.filter((client) => client.id != socket.id);
+			if (type == "viewer") {
 				session.clients.viewers = session.clients.viewers.filter((client) => client.id != socket.id);
-
-				socket.to(idSession).emit("leave", socket.id);
+				socket.to(idSession).emit("viewer left", socket.id)
+			}
+			if (type == "sender") {
+				session.clients.senders = session.clients.senders.filter((client) => client.id != socket.id);
+				socket.to(idSession).emit("sender left", socket.id);
+			}
 
 				console.log(`Client ${socket.id} disconnesso dalla sessione ${idSession}`);
 				saveSessionToFile(idSession);
-			}
 		});
-
-		// Gestione dell'invio di una nuova parola da un sender
-		/*
-		socket.on("new-word", (sessionId, word) => {
-			const session = sessions[sessionId];
 			if (session) {
 				session.words.push(word);
 				io.to(sessionId).emit("update-cloud", word); // Trasmette solo nella stanza della sessione

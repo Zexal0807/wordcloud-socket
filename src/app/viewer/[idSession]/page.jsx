@@ -18,10 +18,13 @@ const Viewer = () => {
 				if (response.ok) {
 					const d = await response.json();
 					setData({ ...d, senders: [], questions: [] });
+				} else if (response.status === 404) {
+					console.log("SESSIONE NON TROVATA");
+					redirect("/?error=not-found");
 				}
 			} catch (e) {
-				console.log("SESSIONE NON TROVATA");
-				redirect("/?not-found");
+				console.log("Errore di rete o altro:", e);
+				redirect("/?error=505");
 			}
 		};
 
@@ -42,7 +45,7 @@ const Viewer = () => {
 			if (!res.status) {
 				if (res.msg == "full") {
 					console.log("SESSIONE NON TROVATA");
-					redirect("/?full");
+						redirect("/?error=full");
 				}
 			}
 			if (res.status) {
@@ -54,14 +57,14 @@ const Viewer = () => {
 			}
 		});
 
-		socketInstance.on("join", (res) => {
+		socketInstance.on("sender join", (res) => {
 			setData((d) => ({
 				...d,
 				senders: [...d.senders, res],
 			}));
 		});
 
-		socketInstance.on("leave", (res) => {
+		socketInstance.on("sender left", (res) => {
 			setData((d) => ({
 				...d,
 				senders: [...d.senders.filter((sender) => sender.id != res)],
