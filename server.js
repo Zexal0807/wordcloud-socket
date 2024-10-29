@@ -82,7 +82,7 @@ app.prepare().then(() => {
 
 			if (type == "viewer") {
 				session.clients.viewers.push({ id: socket.id });
-				socket.join(idSession);
+				socket.join("v" + idSession);
 
 				console.log(`Viewer aggiunto alla sessione ${idSession}`);
 
@@ -102,11 +102,11 @@ app.prepare().then(() => {
 				let sender = { id: socket.id, name: socket.name }
 
 				session.clients.senders.push(sender);
-				socket.join(idSession);
+				socket.join("s" + idSession);
 
 				console.log(`Sender ${clientInfo.name} aggiunto alla sessione ${idSession}`);
 
-				socket.to(idSession).emit("sender join", sender);
+				socket.to("v" + idSession).emit("sender join", sender);
 
 				callbackData = {
 					status: true,
@@ -130,13 +130,14 @@ app.prepare().then(() => {
 			if (type == "viewer") {
 				session.clients.viewers = session.clients.viewers.filter((client) => client.id != socket.id);
 				// socket.to(idSession).emit("viewer left", socket.id)
+				console.log(`Viewer ${socket.id} disconnesso dalla sessione ${idSession}`);
 			}
 			if (type == "sender") {
 				session.clients.senders = session.clients.senders.filter((client) => client.id != socket.id);
-				socket.to(idSession).emit("sender left", socket.id);
+				socket.to("v" + idSession).emit("sender left", socket.id);
+				console.log(`Sender ${socket.id} disconnesso dalla sessione ${idSession}`);
 			}
 
-			console.log(`Client ${socket.id} disconnesso dalla sessione ${idSession}`);
 			saveSessionToFile(idSession);
 		});
 
@@ -147,7 +148,7 @@ app.prepare().then(() => {
 			session.question = idQuestion;
 
 			if (session) {
-				io.to(idSession).emit("change question", {
+				io.to("s" + idSession).emit("change question", {
 					...session.questions[idQuestion],
 					idQuestion,
 					answers: null
@@ -172,7 +173,7 @@ app.prepare().then(() => {
 			}
 
 			session.questions[idQuestion].answers.push(a)
-			io.to(idSession).emit("send answer", { idQuestion, data: a });
+			io.to("v" + idSession).emit("send answer", { idQuestion, data: a });
 			saveSessionToFile(idSession);
 		});
 
