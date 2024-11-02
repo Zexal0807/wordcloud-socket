@@ -33,7 +33,7 @@ const Sender = () => {
 					setStatus(STATUS_LOGGING);
 				} else if (response.status === 404) {
 					console.log("SESSIONE NON TROVATA");
-					redirect("/?error=not-found");
+					return redirect("/?error=not-found");
 				}
 			} catch (e) {
 				console.log("Errore di rete o altro:", e);

@@ -3,6 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import Cleave from "cleave.js/react";
+
+import ErrorComponent from "./components/ErrorComponent";
+
 export default function Home() {
 	const searchParams = useSearchParams();
 	const router = useRouter();
@@ -21,54 +25,36 @@ export default function Home() {
 	const [code, setCode] = useState("");
 
 	return (
-		<div
-			className="w-100 h-100"
-			style={{backgroundColor: "#e491da"}}
-		>
-			<div
-				className="w-100 p-2"
-				style={{
-					backgroundColor: "#550000",
-					color: "white",
-				}}
-			>
-				{queryMessage}
-			</div>
+		<div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+			{queryMessage ? <ErrorComponent reason={queryMessage} /> : ""}
+
+			<h1>MIOQUIZZONE</h1>
 
 			<div
 				style={{
-					height: "100%",
-					width: "100%",
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					flexDirection: "column",
+					backgroundColor: "white",
+					borderRadius: 3,
+					padding: 20,
 				}}
 			>
-				<h1>MIOQUIZZONE</h1>
+				<Cleave
+					className="w-100 text-center"
+					options={{
+						blocks: [4, 4],
+						numericOnly: true,
+					}}
+					onChange={(e) => setCode(e.target.value)}
+				/>
 
-				<div
-					style={{
-						backgroundColor: "white",
-						borderRadius: 5,
-						padding: 10,
+				<button
+					style={{ width: "100%", backgroundColor: "#e491da" }}
+					onClick={() => {
+						if (code.length != 8) return;
+						router.push(`/sender/${code}`);
 					}}
 				>
-					<input
-						style={{ width: "100%", fontSize: 20 }}
-						value={code}
-						onChange={(e) => setCode(e.target.value)}
-					/>
-					<button
-						style={{ width: "100%", backgroundColor: "#e491da" }}
-						onClick={() => {
-							if (code.length != 8) return;
-							router.push(`/sender/${code}`);
-						}}
-					>
-						ENTRA
-					</button>
-				</div>
+					ENTRA
+				</button>
 			</div>
 		</div>
 	);
