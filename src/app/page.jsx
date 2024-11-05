@@ -25,31 +25,26 @@ export default function Home() {
 	const [code, setCode] = useState("");
 
 	return (
-		<div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+		<div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center bg-primary">
 			{queryMessage ? <ErrorComponent reason={queryMessage} /> : ""}
 
 			<h1>MIOQUIZZONE</h1>
 
-			<div
-				style={{
-					backgroundColor: "white",
-					borderRadius: 3,
-					padding: 20,
-				}}
-			>
+			<div className="p-4 bg-light rounded-1">
 				<Cleave
-					className="w-100 text-center"
+					className="w-100 text-center rounded-top p-2 border border-secondary"
 					options={{
 						blocks: [4, 4],
 						numericOnly: true,
 					}}
-					onChange={(e) => setCode(e.target.value)}
+					onChange={(e) => setCode(e.target.value.replace(" ", ""))}
 				/>
 
 				<button
-					style={{ width: "100%", backgroundColor: "#e491da" }}
+					className="w-100 text-center rounded-bottom p-2 border border-top-0 border-secondary bg-primary text-light"
 					onClick={() => {
-						if (code.length != 8) return;
+						if (code.length != 8) 
+							return;
 						router.push(`/sender/${code}`);
 					}}
 				>

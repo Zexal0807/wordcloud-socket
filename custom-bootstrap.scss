@@ -1,0 +1,61 @@
+// Imposta i colori principali per il tema
+$primary: #007bff;     // Blu scuro
+$success: #28a745;     // Verde vivace
+$warning: #ff8c00;     // Arancione caldo
+$danger: #e94337;      // Rosso brillante
+$info: #5dddf6;        // Azzurro (solo per informazioni, opzionale)
+
+// Background e testo
+$body-bg: #F6F7EB;      // Sfondo chiaro
+$body-color: #393E41;   // Testo principale, grigio scuro per contrasto
+
+// Personalizza i bottoni
+$btn-primary-bg: $primary;
+$btn-primary-border: darken($primary, 10%);
+$btn-primary-hover-bg: darken($primary, 15%);
+
+$btn-success-bg: $success;
+$btn-success-border: darken($success, 10%);
+$btn-success-hover-bg: darken($success, 15%);
+
+$btn-warning-bg: $warning;
+$btn-warning-border: darken($warning, 10%);
+$btn-warning-hover-bg: darken($warning, 15%);
+
+$btn-danger-bg: $danger;
+$btn-danger-border: darken($danger, 10%);
+$btn-danger-hover-bg: darken($danger, 15%);
+
+// Colori aggiuntivi per elementi interattivi
+$link-color: $primary;
+$link-hover-color: darken($primary, 15%);
+
+$input-border-color: lighten($body-color, 40%);
+$input-focus-border-color: $primary;
+
+// Personalizza le variabili delle cards
+$card-bg: #ffffff;
+$card-border-color: lighten($body-color, 50%);
+$card-header-bg: $primary;
+$card-header-color: #ffffff;
+
+// Barra di navigazione (navbar)
+$navbar-light-bg: #ffffff;
+$navbar-light-color: $primary;
+$navbar-light-hover-color: darken($primary, 10%);
+
+$navbar-dark-bg: $primary;
+$navbar-dark-color: #ffffff;
+$navbar-dark-hover-color: lighten($primary, 15%);
+
+// Tooltip e Popover
+$tooltip-bg: darken($primary, 20%);
+$tooltip-color: #ffffff;
+
+$popover-bg: lighten($primary, 20%);
+$popover-border-color: $primary;
+$popover-header-bg: $primary;
+$popover-body-color: #ffffff;
+
+// Bootstrap and its default variables
+@import "node_modules/bootstrap/scss/bootstrap";

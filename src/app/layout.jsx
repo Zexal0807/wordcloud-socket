@@ -1,6 +1,4 @@
-import "./globals.css";
-
-import 'bootstrap/dist/css/bootstrap.min.css';
+import './../../custom-bootstrap.scss';
 import BootstrapScript from "./components/BootstrapScript";
 
 export const metadata = {
@@ -11,7 +9,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
 	return (
 		<html lang="it">
-			<body style={{ width: "100vw", height: "100vh" }}>
+			<body style={{ width: "100vw", height: "100vh", overflowY: "hidden" }}>
 				<BootstrapScript />
 				{children}
 			</body>
