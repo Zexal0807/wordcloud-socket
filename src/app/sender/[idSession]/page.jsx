@@ -2,18 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
-import { useParams, redirect } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 const Sender = () => {
-	const params = useParams();
-	const { idSession } = params;
+	const { idSession } = useParams();
+	const router = useRouter();
 
 	const [data, setData] = useState({ title: null });
-
 	const [name, setName] = useState("");
-
 	const [socket, setSocket] = useState();
-
 	const [question, setQuestion] = useState(null);
 
 	const STATUS_INITIAL = "initial";
@@ -33,11 +30,11 @@ const Sender = () => {
 					setStatus(STATUS_LOGGING);
 				} else if (response.status === 404) {
 					console.log("SESSIONE NON TROVATA");
-					return redirect("/?error=not-found");
+					router.push("/?error=not-found");
 				}
 			} catch (e) {
 				console.log("Errore di rete o altro:", e);
-				redirect("/?error=505");
+				router.push("/?error=505");
 			}
 		};
 
@@ -59,7 +56,7 @@ const Sender = () => {
 			if (!res.status) {
 				if (res.msg == "full") {
 					console.log("SESSIONE NON TROVATA");
-					redirect("/?error=full");
+					router.push("/?error=full");
 				}
 			}
 			if (res.question) {
@@ -71,7 +68,7 @@ const Sender = () => {
 		});
 
 		socket.on("viewer left", (res) => { 
-			redirect("/?error=end");
+			router.push("/?error=end");
 		});
 
 		socket.on("change question", (question) => {
@@ -130,7 +127,7 @@ const Sender = () => {
 		);
 	};
 
-	switch(status){
+	switch (status) {
 		case STATUS_LOGGING:
 			return loggingPage();
 		case STATUS_WAITING_VIEWER:

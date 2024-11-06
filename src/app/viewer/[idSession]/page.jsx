@@ -2,15 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
-import { useParams, redirect } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 const Viewer = () => {
 	const { idSession } = useParams();
+	const router = useRouter();
 
 	const [data, setData] = useState({ title: null });
-
 	const [socket, setSocket] = useState(null);
-
 	const [question, setQuestion] = useState(-1);
 
 	const STATUS_INITIAL = "initial";
@@ -27,11 +26,11 @@ const Viewer = () => {
 					setData({ ...d, senders: [], questions: [] });
 				} else if (response.status === 404) {
 					console.log("SESSIONE NON TROVATA");
-					redirect("/?error=not-found");
+					router.push("/?error=not-found");
 				}
 			} catch (e) {
 				console.log("Errore di rete o altro:", e);
-				redirect("/?error=505");
+				router.push("/?error=505");
 			}
 		};
 
@@ -52,7 +51,7 @@ const Viewer = () => {
 			if (!res.status) {
 				if (res.msg == "full") {
 					console.log("SESSIONE NON TROVATA");
-						redirect("/?error=full");
+					router.push("/?error=full");
 				}
 			}
 			if (res.status) {
