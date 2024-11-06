@@ -25,7 +25,7 @@ export default function Home() {
 	const [code, setCode] = useState("");
 
 	return (
-		<div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center bg-primary">
+		<>
 			{queryMessage ? <ErrorComponent reason={queryMessage} /> : ""}
 
 			<h1>MIOQUIZZONE</h1>
@@ -43,14 +43,13 @@ export default function Home() {
 				<button
 					className="w-100 text-center rounded-bottom p-2 border border-top-0 border-secondary bg-primary text-light"
 					onClick={() => {
-						if (code.length != 8) 
-							return;
+						if (code.length != 8) return;
 						router.push(`/sender/${code}`);
 					}}
 				>
 					ENTRA
 				</button>
 			</div>
-		</div>
+		</>
 	);
 }

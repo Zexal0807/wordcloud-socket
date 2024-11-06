@@ -1,4 +1,4 @@
-import './../../custom-bootstrap.scss';
+import "./../../custom-bootstrap.scss";
 import BootstrapScript from "./components/BootstrapScript";
 
 export const metadata = {
@@ -9,9 +9,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
 	return (
 		<html lang="it">
-			<body style={{ width: "100vw", height: "100vh", overflowY: "hidden" }}>
+			<body
+				style={{ width: "100vw", height: "100vh", overflowY: "hidden" }}
+			>
 				<BootstrapScript />
-				{children}
+				<div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center bg-primary">
+					{children}
+				</div>
 			</body>
 		</html>
 	);

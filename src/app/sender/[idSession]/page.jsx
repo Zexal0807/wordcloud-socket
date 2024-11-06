@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { useParams, useRouter } from "next/navigation";
 
+import LoginPage from "@/app/components/LoginPage";
+
 const Sender = () => {
 	const { idSession } = useParams();
 	const router = useRouter();
@@ -67,7 +69,7 @@ const Sender = () => {
 			}
 		});
 
-		socket.on("viewer left", (res) => { 
+		socket.on("viewer left", (res) => {
 			router.push("/?error=end");
 		});
 
@@ -84,29 +86,25 @@ const Sender = () => {
 
 	const sendAnswer = (answer) => {
 		socket.emit("send answer", { idQuestion: question.idQuestion, answer })
-		if (!question.multipla) { 
+		if (!question.multipla) {
 			setStatus(STATUS_WAITING_NEXT_QUESTION);
 		}
 	}
 
-	const loggingPage = () => {
+	const questionPage = () => {
 		return (
 			<div>
-				<input value={name} onChange={(e) => setName(e.target.value)} />
-				<button onClick={join}>ENTRA</button>
+				{question.question}
+
+				<button
+					onClick={() => {
+						sendAnswer(1);
+					}}
+				>
+					RISPOSTA a
+				</button>
 			</div>
 		);
-	}
-
-	const questionPage = () => {
-		return <div>
-			{question.question}
-
-			<button
-				onClick={() => {sendAnswer(1)}}
-			>RISPOSTA a</button>	
-			
-		</div>;
 	};
 
 	const waitingPage = () => {
@@ -129,7 +127,7 @@ const Sender = () => {
 
 	switch (status) {
 		case STATUS_LOGGING:
-			return loggingPage();
+			return <LoginPage join={join} name={name} setName={setName} />;
 		case STATUS_WAITING_VIEWER:
 			return waitingPage();
 		case STATUS_ANSWERING:
