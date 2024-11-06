@@ -1,0 +1,14 @@
+{
+	"title": "CIAO",
+	"questions": [
+		{
+			"type": "quiz",
+			"multiple": false,
+			"question": "Scegli",
+			"a": { "text": "A" },
+			"b": { "text": "A" },
+			"c": { "text": "A" },
+			"d": { "text": "A" }
+		}
+	]
+}
