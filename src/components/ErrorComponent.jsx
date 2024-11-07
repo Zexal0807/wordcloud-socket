@@ -1,7 +1,7 @@
 export default function ErrorComponent({ reason }) {
 
 	const messages = {
-		"not-found": "La sessione a cui vuoi unirti non è stata trovato, controola di aver inserito correttamente il codice",
+		"not-found": "La sessione a cui vuoi unirti non è stata trovato, controlla di aver inserito correttamente il codice",
 		"full": "La sessione a cui vuoi unirti è attualmente piena, riprova più tardi",
 		"505": "Errore 505, stiamo avengo qualche errore con il server, riprova più tardi"
 	}

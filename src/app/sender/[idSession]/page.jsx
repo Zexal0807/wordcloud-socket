@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { useParams, useRouter } from "next/navigation";
 
-import LoginPage from "@/app/components/LoginPage";
+import LoginPage from "@/pages/LoginPage";
 
 const Sender = () => {
 	const { idSession } = useParams();

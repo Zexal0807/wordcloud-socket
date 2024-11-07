@@ -1,5 +1,5 @@
 import "./../../custom-bootstrap.scss";
-import BootstrapScript from "./components/BootstrapScript";
+import BootstrapScript from "../components/BootstrapScript";
 
 export const metadata = {
 	title: "Create Next App",
