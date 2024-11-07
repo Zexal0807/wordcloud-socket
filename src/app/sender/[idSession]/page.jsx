@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { useParams, useRouter } from "next/navigation";
 
-import LoginPage from "@/pages/LoginPage";
+import LoginPage from "@/pages/sender/LoginScreen";
+import WaitingScreen from "@/pages/sender/WaitingScreen";
 
 const Sender = () => {
 	const { idSession } = useParams();
@@ -42,13 +43,6 @@ const Sender = () => {
 
 		fetchData();
 	}, []);
-
-	const join = () => {
-		if (name == "") 
-			return;
-		if (!socket) 
-			setSocket(io("http://localhost:3000"));
-	};
 
 	useEffect(() => {
 		if (!socket) 
@@ -107,15 +101,6 @@ const Sender = () => {
 		);
 	};
 
-	const waitingPage = () => {
-		return (
-			<div>
-				{data.title}
-				sei in attesa che l host inizi
-			</div>
-		);
-	};
-
 	const waitingNextPage = () => {
 		return (
 			<div>
@@ -127,9 +112,20 @@ const Sender = () => {
 
 	switch (status) {
 		case STATUS_LOGGING:
-			return <LoginPage join={join} name={name} setName={setName} />;
+			return <LoginPage 
+				name={name} 
+				setName={setName} 
+				join={() => {
+					if (name == "") 
+						return;
+					if (!socket) 
+						setSocket(io("http://localhost:3000"));
+				}} 
+			/>;
 		case STATUS_WAITING_VIEWER:
-			return waitingPage();
+			return <WaitingScreen 
+				data={data}
+			/>;
 		case STATUS_ANSWERING:
 			return questionPage();
 		case STATUS_WAITING_NEXT_QUESTION:

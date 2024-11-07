@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Cleave from "cleave.js/react";
 
 import ErrorComponent from "../components/ErrorComponent";
+import Logo from "@/components/Logo";
 
 export default function Home() {
 	const searchParams = useSearchParams();
@@ -24,35 +25,40 @@ export default function Home() {
 
 	const [code, setCode] = useState("");
 
-	if (document.querySelector("input"))
+	useEffect(() => {
 		document.querySelector("input").inputMode = "numeric";
+	}, []);
 
 	return (
 		<>
 			{queryMessage ? <ErrorComponent reason={queryMessage} /> : ""}
+			<div className="w-100 h-100 d-flex flex-column justify-content-start justify-content-sm-center align-items-center">
+				<Logo />
 
-			<h1>MIOQUIZZONE</h1>
+				<div className="p-4 bg-light rounded-3 col-11 col-sm-3">
+					<Cleave
+						className="w-100 text-center rounded-top p-3 p-sm-1 border border-secondary h1 m-0"
+						style={{ letterSpacing: "0.2rem" }}
+						options={{
+							blocks: [4, 4],
+							numericOnly: true,
+						}}
+						onChange={(e) =>
+							setCode(e.target.value.replace(" ", ""))
+						}
+					/>
 
-			<div className="p-4 bg-light rounded-1 col-11 col-sm-3">
-				<Cleave
-					className="w-100 text-center rounded-top p-1 border border-secondary h1 m-0"
-					style={{ letterSpacing: "0.2rem"}}
-					options={{
-						blocks: [4, 4],
-						numericOnly: true,
-					}}
-					onChange={(e) => setCode(e.target.value.replace(" ", ""))}
-				/>
-
-				<button
-					className="w-100 text-center rounded-bottom p-3 border border-top-0 border-secondary bg-primary text-light"
-					onClick={() => {
-						if (code.length != 8) return;
-						router.push(`/sender/${code}`);
-					}}
-				>
-					ENTRA
-				</button>
+					<button
+						className="w-100 text-center rounded-bottom p-3 border border-top-0 border-secondary bg-primary text-light h4 m-0"
+						onClick={() => {
+							if (code.length != 8) 
+								return;
+							router.push(`/sender/${code}`);
+						}}
+					>
+						ENTRA
+					</button>
+				</div>
 			</div>
 		</>
 	);
