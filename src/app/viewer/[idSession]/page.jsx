@@ -1,32 +1,27 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useReducer } from "react";
 import io from "socket.io-client";
 import { useParams, useRouter } from "next/navigation";
+
+import { reducer, initialState, ACTIONS, STATUS } from './reducer';
 
 import "./../../style.css";
 
 const Viewer = () => {
 	const { idSession } = useParams();
 	const router = useRouter();
-
-	const [data, setData] = useState({ title: null });
-	const [socket, setSocket] = useState(null);
-	const [question, setQuestion] = useState(-1);
-
-	const STATUS_INITIAL = "initial";
-	const STATUS_WAITING_SENDERS = "waiting";
-	const STATUS_ANSWERING = "answering";
-	const [status, setStatus] = useState(STATUS_INITIAL);
+	const [state, dispatch] = useReducer(reducer, initialState);
 
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
 				const response = await fetch(`./../api/session/${idSession}`);
 				if (response.ok) {
-					const d = await response.json();
-					setData({ ...d, senders: [], questions: [] });
-				} else if (response.status === 404) {
+					const data = await response.json();
+					dispatch({ type: ACTIONS.SET_DATA, payload: { ...data, senders: [], questions: [] } });
+					dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.WAITING_SENDERS });
+				} else if (response.status == 404) {
 					console.log("SESSIONE NON TROVATA");
 					router.push("/?error=not-found");
 				}
@@ -40,129 +35,80 @@ const Viewer = () => {
 	}, []);
 
 	useEffect(() => {
-		if (!data.title) 
-			return;
-
-		if (socket) 
+		if (!state.data.title || state.socket) 
 			return;
 
 		const socketInstance = io(process.env.HOST);
-		setSocket(socketInstance);
+		dispatch({ type: ACTIONS.SET_SOCKET, payload: socketInstance });
 
 		socketInstance.emit("join-session", idSession, { type: "viewer" }, (res) => {
-			if (!res.status) {
-				if (res.msg == "full") {
-					console.log("SESSIONE NON TROVATA");
-					router.push("/?error=full");
-				}
-			}
-			if (res.status) {
-				setData((d) => ({
-					...d,
-					senders: res.senders,
-					questions: res.questions,
-				}));
-				setStatus(STATUS_WAITING_SENDERS);
+			if (!res.status && res.msg == "full") {
+				console.log("SESSIONE NON TROVATA");
+				router.push("/?error=full");
+			} else if (res.status) {
+				dispatch({
+					type: ACTIONS.SET_DATA,
+					payload: { ...state.data, senders: res.senders, questions: res.questions },
+				});
+				dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.WAITING_SENDERS });
 			}
 		});
 
 		socketInstance.on("sender join", (res) => {
-			setData((d) => ({
-				...d,
-				senders: [...d.senders, res],
-			}));
+			dispatch({ type: ACTIONS.ADD_SENDER, payload: res });
 		});
 
 		socketInstance.on("sender left", (res) => {
-			setData((d) => ({
-				...d,
-				senders: [...d.senders.filter((sender) => sender.id != res)],
-			}));
+			dispatch({ type: ACTIONS.REMOVE_SENDER, payload: res });
 		});
 
 		socketInstance.on("send answer", ({ idQuestion, data }) => {
-			setData((d) => {
-				let u = [...d.questions];
-				u[idQuestion] = {
-					...u[idQuestion],
-					answers: [
-						...u[idQuestion].answers,
-						data
-					]
-				}
-				return { ...d, questions: u};
-			});
+			dispatch({ type: ACTIONS.ADD_ANSWER, payload: { idQuestion, data } });
 		});
 
 		return () => {
-			if (socket) 
-				socket.disconnect();
+			if (state.socket) 
+				state.socket.disconnect();
 		};
-	}, [data.title]);
-
+	}, [state.data.title, state.socket]);
 
 	const updateQuestion = (index) => {
-		socket.emit("change question", index);
-		setQuestion(index);
-		if(index < 0 )
-			setStatus(STATUS_WAITING_SENDERS);
-		else
-			setStatus(STATUS_ANSWERING);
+		state.socket.emit("change question", index);
+		dispatch({ type: ACTIONS.SET_QUESTION, payload: index });
+		dispatch({ type: ACTIONS.SET_STATUS, payload: index < 0 ? STATUS.WAITING_SENDERS : STATUS.ANSWERING });
 	};
 
-	const waitPage = () => {
-		return (<div>
-				<h2>{data.title}</h2>
-				<h5>Connessi: {data.senders.map((s) => s.name)}</h5>
-				<>Attendiamo che entrino tutti</>
-					<button
-						onClick={() => {
-							updateQuestion(0);
-						}}
-					>
-						INZIA
-					</button>
-			</div>
-		);
-	};
+	const waitPage = () => (
+		<div>
+			<h2>{state.data.title}</h2>
+			<h5>Connessi: {state.data.senders.map((s) => s.name)}</h5>
+			<div>Attendiamo che entrino tutti</div>
+			<button onClick={() => updateQuestion(0)}>INIZIA</button>
+		</div>
+	);
 
-	const questionPage = () => {
-		return (
-			<div>
-				<button
-					onClick={() => {
-						updateQuestion(question - 1);
-					}}
-				>
-					PREC
-				</button>
-
-				{data.questions[question].type}
-
-				<button
-					onClick={() => {
-						updateQuestion(question + 1);
-					}}
-				>
-					NEXT
-				</button>
-
-
-				{JSON.stringify(data.questions[question])}
-
-			</div>
-		);
-	};
+	const questionPage = () => (
+		<div>
+			<button onClick={() => updateQuestion(state.question - 1)}>
+				PREC
+			</button>
+			{state.data.questions[state.question]?.type}
+			<button onClick={() => updateQuestion(state.question + 1)}>
+				NEXT
+			</button>
+			{JSON.stringify(state.data.questions[state.question])}
+		</div>
+	);
 
 	return (
 		<div className="w-100 h-100 d-flex flex-column">
 			<nav className="col-11 col-sm-8 text-center bg-white text-primary rounded-bottom d-flex align-items-center justify-content-center m-auto">
-				<h1>{data.title}</h1>
+				<h1>{state.data.title}</h1>
 			</nav>
 			<div className="py-2">
 				<div className="col-11 col-sm-8 h-100 m-auto p-0 bg-white text-primary rounded">
-					{status == STATUS_WAITING_SENDERS &&  waitPage()}
-					{status == STATUS_ANSWERING &&  questionPage()}
+					{state.status == STATUS.WAITING_SENDERS && waitPage()}
+					{state.status == STATUS.ANSWERING && questionPage()}
 				</div>
 			</div>
 		</div>

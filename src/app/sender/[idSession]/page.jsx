@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useReducer } from "react";
 import io from "socket.io-client";
 import { useParams, useRouter } from "next/navigation";
+
+import { reducer, initialState, ACTIONS, STATUS } from './reducer';
 
 import "./../../style.css";
 import LoginScreen from "@/pages/sender/LoginScreen";
@@ -13,107 +15,98 @@ import WaitingNextScreen from "@/pages/sender/WaitingNextScreen";
 const Sender = () => {
 	const { idSession } = useParams();
 	const router = useRouter();
-
-	const [data, setData] = useState({ title: null });
-	const [name, setName] = useState("");
-	const [socket, setSocket] = useState();
-	const [question, setQuestion] = useState(null);
-
-	const STATUS_INITIAL = "initial";
-	const STATUS_LOGGING = "logging";
-	const STATUS_WAITING_VIEWER = "waiting";
-	const STATUS_ANSWERING = "answering";
-	const STATUS_WAITING_NEXT_QUESTION = "waitingquestion";
-	const [status, setStatus] = useState(STATUS_INITIAL);
+	const [state, dispatch] = useReducer(reducer, initialState);
 
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
 				const response = await fetch(`./../api/session/${idSession}`);
 				if (response.ok) {
-					const d = await response.json();
-					setData({ ...d });
-					setStatus(STATUS_LOGGING);
-				} else if (response.status === 404) {
-					console.log("SESSIONE NON TROVATA");
+					const data = await response.json();
+					dispatch({ type: ACTIONS.SET_DATA, payload: data });
+					dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.LOGGING });
+				} else if (response.status == 404) {
 					router.push("/?error=not-found");
 				}
 			} catch (e) {
-				console.log("Errore di rete o altro:", e);
 				router.push("/?error=505");
 			}
 		};
 
 		fetchData();
-	}, []);
+	}, [idSession, router]);
 
 	useEffect(() => {
-		if (!socket) 
+		if (!state.socket) 
 			return;
 
-		socket.emit("join-session", idSession, { type: "sender", name }, (res) => {
+		state.socket.emit("join-session", idSession, { type: "sender", name: state.name }, (res) => {
 			if (!res.status) {
 				if (res.msg == "full") {
-					console.log("SESSIONE NON TROVATA");
 					router.push("/?error=full");
 				}
-			}
-			if (res.question) {
-				setStatus(STATUS_ANSWERING);
-				setQuestion(res.question);
+			} else if (res.question) {
+				dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.ANSWERING });
+				dispatch({ type: ACTIONS.SET_QUESTION, payload: res.question });
 			} else {
-				setStatus(STATUS_WAITING_VIEWER);
+				dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.WAITING_VIEWER });
 			}
 		});
 
-		socket.on("viewer left", (res) => {
+		state.socket.on("viewer left", () => {
 			router.push("/?error=end");
 		});
 
-		socket.on("change question", (question) => {
-			setQuestion(question);
-			setStatus(STATUS_ANSWERING);
+		state.socket.on("change question", (question) => {
+			dispatch({ type: ACTIONS.SET_QUESTION, payload: question });
+			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.ANSWERING });
 		});
 
 		return () => {
-			if (socket) {
-				socket.disconnect();
-				setSocket(null);
+			if (state.socket) {
+				state.socket.disconnect();
+				dispatch({ type: ACTIONS.SET_SOCKET, payload: null });
 			}
 		};
-	}, [socket]);
+	}, [state.socket, idSession, router, state.name]);
 
 	const sendAnswer = (answer) => {
-		socket.emit("send answer", { idQuestion: question.idQuestion, answer });
-		if (!question.multipla) {
-			setStatus(STATUS_WAITING_NEXT_QUESTION);
+		state.socket.emit("send answer", {
+			idQuestion: state.question.idQuestion,
+			answer,
+		});
+		if (!state.question.multipla) {
+			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.WAITING_NEXT_QUESTION });
 		}
 	};
 
-	if (status == STATUS_LOGGING)
+	if (state.status == STATUS.LOGGING) {
 		return (
 			<LoginScreen
-				name={name}
-				setName={setName}
+				name={state.name}
+				setName={(name) =>
+					dispatch({ type: ACTIONS.SET_NAME, payload: name })
+				}
 				join={() => {
-					if (name == "") 
-						return;
-					if (!socket) 
-						setSocket(io(process.env.HOST));
+					if (state.name) {
+						const socket = io(process.env.HOST);
+						dispatch({ type: ACTIONS.SET_SOCKET, payload: socket });
+					}
 				}}
 			/>
 		);
+	}
 
 	return (
 		<div className="w-100 h-100 d-flex flex-column">
 			<nav className="col-11 col-sm-8 text-center bg-white text-primary rounded-bottom d-flex align-items-center justify-content-center m-auto">
-				<h1>{data.title}</h1>
+				<h1>{state.data.title}</h1>
 			</nav>
 			<div className="py-2">
 				<div className="col-11 col-sm-8 h-100 m-auto p-0 bg-white text-primary rounded">
-					{status == STATUS_WAITING_VIEWER && <WaitingScreen />}
-					{status == STATUS_ANSWERING && <QuestionScreen question={question} sendAnswer={sendAnswer}/>}
-					{status == STATUS_WAITING_NEXT_QUESTION && <WaitingNextScreen />}
+					{state.status == STATUS.WAITING_VIEWER && <WaitingScreen />}
+					{state.status == STATUS.ANSWERING && <QuestionScreen question={state.question} sendAnswer={sendAnswer} />}
+					{state.status == STATUS.WAITING_NEXT_QUESTION && <WaitingNextScreen />}
 				</div>
 			</div>
 		</div>
