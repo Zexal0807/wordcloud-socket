@@ -1,0 +1,14 @@
+nav {
+	height: 10%;
+}
+nav + div{
+    height: 90%;
+}
+@media screen and (max-width: 760px) {
+	nav {
+		height: 7%;
+	}
+    nav + div{
+        height: 93%;
+    }
+}

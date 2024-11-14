@@ -7,7 +7,7 @@ export default function () {
 			>
 				<span className="visually-hidden">Loading...</span>
 			</div>
-			<h4>Sei in attesa che l'host inizi il quiz</h4>
+			<h4>In attesa della prossima domanda</h4>
 		</div>
 	);
 }

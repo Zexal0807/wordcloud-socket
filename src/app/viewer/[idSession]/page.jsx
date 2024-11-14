@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { useParams, useRouter } from "next/navigation";
 
+import "./../../style.css";
+
 const Viewer = () => {
 	const { idSession } = useParams();
 	const router = useRouter();
@@ -44,7 +46,7 @@ const Viewer = () => {
 		if (socket) 
 			return;
 
-		const socketInstance = io("http://localhost:3000");
+		const socketInstance = io(process.env.HOST);
 		setSocket(socketInstance);
 
 		socketInstance.emit("join-session", idSession, { type: "viewer" }, (res) => {
@@ -152,14 +154,19 @@ const Viewer = () => {
 		);
 	};
 
-	switch (status) {
-		case STATUS_WAITING_SENDERS:
-			return waitPage();
-		case STATUS_ANSWERING:
-			return questionPage();
-		default:
-			return <div>NON CONNESSO</div>
-	}
+	return (
+		<div className="w-100 h-100 d-flex flex-column">
+			<nav className="col-11 col-sm-8 text-center bg-white text-primary rounded-bottom d-flex align-items-center justify-content-center m-auto">
+				<h1>{data.title}</h1>
+			</nav>
+			<div className="py-2">
+				<div className="col-11 col-sm-8 h-100 m-auto p-0 bg-white text-primary rounded">
+					{status == STATUS_WAITING_SENDERS &&  waitPage()}
+					{status == STATUS_ANSWERING &&  questionPage()}
+				</div>
+			</div>
+		</div>
+	);
 };
 
 export default Viewer;

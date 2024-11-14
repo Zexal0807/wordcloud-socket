@@ -4,8 +4,11 @@ import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { useParams, useRouter } from "next/navigation";
 
-import LoginPage from "@/pages/sender/LoginScreen";
+import "./../../style.css";
+import LoginScreen from "@/pages/sender/LoginScreen";
 import WaitingScreen from "@/pages/sender/WaitingScreen";
+import QuestionScreen from "@/pages/sender/QuestionScreen";
+import WaitingNextScreen from "@/pages/sender/WaitingNextScreen";
 
 const Sender = () => {
 	const { idSession } = useParams();
@@ -73,66 +76,48 @@ const Sender = () => {
 		});
 
 		return () => {
-			if (socket) 
+			if (socket) {
 				socket.disconnect();
+				setSocket(null);
+			}
 		};
 	}, [socket]);
 
 	const sendAnswer = (answer) => {
-		socket.emit("send answer", { idQuestion: question.idQuestion, answer })
+		socket.emit("send answer", { idQuestion: question.idQuestion, answer });
 		if (!question.multipla) {
 			setStatus(STATUS_WAITING_NEXT_QUESTION);
 		}
-	}
-
-	const questionPage = () => {
-		return (
-			<div>
-				{question.question}
-
-				<button
-					onClick={() => {
-						sendAnswer(1);
-					}}
-				>
-					RISPOSTA a
-				</button>
-			</div>
-		);
 	};
 
-	const waitingNextPage = () => {
+	if (status == STATUS_LOGGING)
 		return (
-			<div>
-				{data.title}
-				Attendiao che tutti rispondano
-			</div>
-		);
-	};
-
-	switch (status) {
-		case STATUS_LOGGING:
-			return <LoginPage 
-				name={name} 
-				setName={setName} 
+			<LoginScreen
+				name={name}
+				setName={setName}
 				join={() => {
 					if (name == "") 
 						return;
 					if (!socket) 
-						setSocket(io("http://localhost:3000"));
-				}} 
-			/>;
-		case STATUS_WAITING_VIEWER:
-			return <WaitingScreen 
-				data={data}
-			/>;
-		case STATUS_ANSWERING:
-			return questionPage();
-		case STATUS_WAITING_NEXT_QUESTION:
-			return waitingNextPage();
-		default:
-			return <div>BO</div>;
-	}
+						setSocket(io(process.env.HOST));
+				}}
+			/>
+		);
+
+	return (
+		<div className="w-100 h-100 d-flex flex-column">
+			<nav className="col-11 col-sm-8 text-center bg-white text-primary rounded-bottom d-flex align-items-center justify-content-center m-auto">
+				<h1>{data.title}</h1>
+			</nav>
+			<div className="py-2">
+				<div className="col-11 col-sm-8 h-100 m-auto p-0 bg-white text-primary rounded">
+					{status == STATUS_WAITING_VIEWER && <WaitingScreen />}
+					{status == STATUS_ANSWERING && <QuestionScreen question={question} sendAnswer={sendAnswer}/>}
+					{status == STATUS_WAITING_NEXT_QUESTION && <WaitingNextScreen />}
+				</div>
+			</div>
+		</div>
+	);
 };
 
 export default Sender;
