@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { reducer, initialState, ACTIONS, STATUS } from './reducer';
 
 import "./../../style.css";
+import WaitingScreen from "@/pages/viewer/WaitingScreen";
 
 const Viewer = () => {
 	const { idSession } = useParams();
@@ -78,14 +79,6 @@ const Viewer = () => {
 		dispatch({ type: ACTIONS.SET_STATUS, payload: index < 0 ? STATUS.WAITING_SENDERS : STATUS.ANSWERING });
 	};
 
-	const waitPage = () => (
-		<div>
-			<h2>{state.data.title}</h2>
-			<h5>Connessi: {state.data.senders.map((s) => s.name)}</h5>
-			<div>Attendiamo che entrino tutti</div>
-			<button onClick={() => updateQuestion(0)}>INIZIA</button>
-		</div>
-	);
 
 	const questionPage = () => (
 		<div>
@@ -107,7 +100,12 @@ const Viewer = () => {
 			</nav>
 			<div className="py-2">
 				<div className="col-11 col-sm-8 h-100 m-auto p-0 bg-white text-primary rounded">
-					{state.status == STATUS.WAITING_SENDERS && waitPage()}
+					{state.status == STATUS.WAITING_SENDERS && <WaitingScreen 
+						state={state} 
+						start={() => {
+							updateQuestion(0)
+						}} 
+					/>}
 					{state.status == STATUS.ANSWERING && questionPage()}
 				</div>
 			</div>
