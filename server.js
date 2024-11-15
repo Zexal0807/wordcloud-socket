@@ -127,7 +127,7 @@ app.prepare().then(() => {
 			const { idSession } = socket;
 
 			const session = sessions[idSession];
-			session.question = idQuestion;
+			session.activeQuestion = idQuestion;
 			session.questionTime = new Date();
 
 			if (session) {
@@ -139,6 +139,30 @@ app.prepare().then(() => {
 			}
 		});
 
+		socket.on("start question", (idQuestion) => {
+			const { idSession } = socket;
+
+			const session = sessions[idSession];
+
+			if (session) {
+				if(session.activeQuestion == idQuestion)
+					io.to("s" + idSession).emit("start question", {idQuestion});
+				return;
+			}
+		});
+
+		socket.on("stop question", (idQuestion) => {
+			const { idSession } = socket;
+
+			const session = sessions[idSession];
+
+			if (session) {
+				if(session.activeQuestion == idQuestion)
+					io.to("s" + idSession).emit("stop question", {idQuestion});
+				return;
+			}
+		});
+
 		socket.on("send answer", ({ idQuestion, answer }) => {
 			const { id, idSession, name } = socket;
 			const session = sessions[idSession];
@@ -146,12 +170,23 @@ app.prepare().then(() => {
 			if (!session)
 				return;
 
-			if (idQuestion != session.question)
+			if (idQuestion != session.activeQuestion)
 				return
+
+			let d = (new Date()).getTime() - session.questionTime.getTime();
+
+			if(session.questions[idQuestion].time > 0 ) {
+				// C'è un tempo massimo di risposta
+				if(d > session.questions[idQuestion].time * 1.05){
+					// Siamo oltre del 5% rispetto al tempo
+					io.to(id).emit("late answer", {});
+					return;
+				}
+			}
 
 			let a = {
 				date: (new Date()).toJSON(),
-				time: (new Date()).getTime() - session.questionTime.getTime(),
+				time: d,
 				sender: { id, name },
 				answer
 			}
@@ -175,6 +210,7 @@ app.prepare().then(() => {
 		else
 			res.json({
 				id: session.id,
+				mode: session.mode,
 				title: session.title
 			});
 	});

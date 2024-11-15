@@ -2,8 +2,10 @@ export const STATUS = {
     INITIAL: "initial",
     LOGGING: "logging",
     WAITING_VIEWER: "waiting",
+    PRE_ANSWERING: "preanswering",
     ANSWERING: "answering",
-    WAITING_NEXT_QUESTION: "waitingquestion"
+    WAITING_NEXT_QUESTION: "waitingquestion",
+    POST_ANSWERING: "postanswering",
 };
 
 export const ACTIONS = {

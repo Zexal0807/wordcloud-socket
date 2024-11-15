@@ -73,16 +73,46 @@ const Viewer = () => {
 		};
 	}, [state.data.title, state.socket]);
 
+
+	const startQuestion = (index) => {
+		state.socket.emit("start question", index);
+	}
+	const stopQuestion = (index) => {
+		state.socket.emit("stop question", index);
+	}
+
 	const updateQuestion = (index) => {
+		debugger;
+		// index è >= 0
 		state.socket.emit("change question", index);
 		dispatch({ type: ACTIONS.SET_QUESTION, payload: index });
-		dispatch({ type: ACTIONS.SET_STATUS, payload: index < 0 ? STATUS.WAITING_SENDERS : STATUS.ANSWERING });
+		
+		if (state.data.mode == "poll") {
+			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.ANSWERING });
+			startQuestion(index);
+		}
+		if (state.data.mode == "quiz") {
+			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.PRE_ANSWERING });
+			setTimeout(()=> {
+				startQuestion(index);
+				
+				if(state.data.time >= 0){
+					setTimeout(()=> {
+						stopQuestion(index);	
+					}, state.data.time);
+				}
+			}, 3000);
+		}
+
 	};
 
 
 	const questionPage = () => (
 		<div>
-			<button onClick={() => updateQuestion(state.question - 1)}>
+			<button onClick={() => {
+				if(state.question == 0) return;
+				updateQuestion(state.question - 1)
+			}}>
 				PREC
 			</button>
 			{state.data.questions[state.question]?.type}
@@ -90,6 +120,11 @@ const Viewer = () => {
 				NEXT
 			</button>
 			{JSON.stringify(state.data.questions[state.question])}
+
+			SE SIAMO IN POOLMODE
+			<button onClick={() => stopQuestion(state.question)}>
+				STOP
+			</button>
 		</div>
 	);
 
@@ -106,6 +141,7 @@ const Viewer = () => {
 							updateQuestion(0)
 						}} 
 					/>}
+					{state.status == STATUS.PRE_ANSWERING && <div>3, 2, 1...</div>}
 					{state.status == STATUS.ANSWERING && questionPage()}
 				</div>
 			</div>

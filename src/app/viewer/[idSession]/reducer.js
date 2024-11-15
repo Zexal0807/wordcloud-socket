@@ -1,7 +1,9 @@
 export const STATUS = {
 	INITIAL: "initial",
 	WAITING_SENDERS: "waiting",
+    PRE_ANSWERING: "preanswering",
 	ANSWERING: "answering",
+    POST_ANSWERING: "postanswering",
 };
 
 export const ACTIONS = {
@@ -15,7 +17,7 @@ export const ACTIONS = {
 };
 
 export const initialState = {
-	data: { title: null, senders: [], questions: [] },
+	data: { title: null, senders: [], questions: [], mode: "" },
 	socket: null,
 	question: -1,
 	status: STATUS.INITIAL,

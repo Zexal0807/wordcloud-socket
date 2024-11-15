@@ -59,7 +59,15 @@ const Sender = () => {
 
 		state.socket.on("change question", (question) => {
 			dispatch({ type: ACTIONS.SET_QUESTION, payload: question });
+			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.PRE_ANSWERING });
+		});
+
+		state.socket.on("start question", (question) => {
 			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.ANSWERING });
+		});
+
+		state.socket.on("stop question", (question) => {
+			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.POST_ANSWERING });
 		});
 
 		return () => {
@@ -105,7 +113,9 @@ const Sender = () => {
 			<div className="py-2">
 				<div className="col-11 col-sm-8 h-100 m-auto p-0 bg-white text-primary rounded">
 					{state.status == STATUS.WAITING_VIEWER && <WaitingScreen />}
+					{state.status == STATUS.PRE_ANSWERING && <div>3, 2, 1...</div>}
 					{state.status == STATUS.ANSWERING && <QuestionScreen question={state.question} sendAnswer={sendAnswer} />}
+					{state.status == STATUS.POST_ANSWERING && <div>Tempo finito ecco il risultato</div>}
 					{state.status == STATUS.WAITING_NEXT_QUESTION && <WaitingNextScreen />}
 				</div>
 			</div>

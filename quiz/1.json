@@ -1,9 +1,11 @@
 {
-	"title": "CIAO",
+	"title": "Il mio poll",
+	"mode": "poll",
 	"questions": [
 		{
-			"type": "quiz",
-			"multiple": false,
+			"type": "choose",
+			"time": -1,
+			"multipleAnswer": false,
 			"question": "Scegli",
 			"a": { "text": "A" },
 			"b": { "text": "A" },
