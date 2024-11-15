@@ -128,6 +128,7 @@ app.prepare().then(() => {
 
 			const session = sessions[idSession];
 			session.question = idQuestion;
+			session.questionTime = new Date();
 
 			if (session) {
 				io.to("s" + idSession).emit("change question", {
@@ -150,9 +151,13 @@ app.prepare().then(() => {
 
 			let a = {
 				date: (new Date()).toJSON(),
-				answer,
-				sender: { id, name }
+				time: (new Date()).getTime() - session.questionTime.getTime(),
+				sender: { id, name },
+				answer
 			}
+			
+			if(session.questions[idQuestion].answers == undefined)
+				session.questions[idQuestion].answers = [];
 
 			session.questions[idQuestion].answers.push(a)
 			io.to("v" + idSession).emit("send answer", { idQuestion, data: a });

@@ -53,7 +53,7 @@ export function reducer(state, action) {
 			updatedQuestions[questionIndex] = {
 				...updatedQuestions[questionIndex],
 				answers: [
-					...updatedQuestions[questionIndex].answers,
+					...updatedQuestions[questionIndex].answers || [],
 					action.payload.data,
 				],
 			};
