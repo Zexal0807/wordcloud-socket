@@ -8,6 +8,7 @@ import { reducer, initialState, ACTIONS, STATUS } from './reducer';
 
 import "./../../style.css";
 import WaitingScreen from "@/pages/viewer/WaitingScreen";
+import PreAnsweringScreen from "@/pages/viewer/PreAnsweringScreen";
 
 const Viewer = () => {
 	const { idSession } = useParams();
@@ -68,8 +69,10 @@ const Viewer = () => {
 		});
 
 		return () => {
-			if (state.socket) 
+			if (state.socket) {
 				state.socket.disconnect();
+				dispatch({ type: ACTIONS.SET_SOCKET, payload: null });
+			}
 		};
 	}, [state.data.title, state.socket]);
 
@@ -82,7 +85,6 @@ const Viewer = () => {
 	}
 
 	const updateQuestion = (index) => {
-		debugger;
 		// index è >= 0
 		state.socket.emit("change question", index);
 		dispatch({ type: ACTIONS.SET_QUESTION, payload: index });
@@ -94,18 +96,20 @@ const Viewer = () => {
 		if (state.data.mode == "quiz") {
 			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.PRE_ANSWERING });
 			setTimeout(()=> {
+				dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.ANSWERING });
 				startQuestion(index);
 				
-				if(state.data.time >= 0){
+				let t = state.data.questions[index].time;
+
+				if(t > 0){
 					setTimeout(()=> {
-						stopQuestion(index);	
-					}, state.data.time);
+						stopQuestion(index);
+						dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.POST_ANSWERING });	
+					}, t);
 				}
-			}, 3000);
+			}, 4500);
 		}
-
 	};
-
 
 	const questionPage = () => (
 		<div>
@@ -141,8 +145,9 @@ const Viewer = () => {
 							updateQuestion(0)
 						}} 
 					/>}
-					{state.status == STATUS.PRE_ANSWERING && <div>3, 2, 1...</div>}
+					{state.status == STATUS.PRE_ANSWERING && <PreAnsweringScreen />}
 					{state.status == STATUS.ANSWERING && questionPage()}
+					{state.status == STATUS.POST_ANSWERING && <div>Ecco i risultati..</div>}
 				</div>
 			</div>
 		</div>

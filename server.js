@@ -211,6 +211,7 @@ app.prepare().then(() => {
 			res.json({
 				id: session.id,
 				mode: session.mode,
+time: session.time,
 				title: session.title
 			});
 	});
