@@ -11,6 +11,7 @@ import LoginScreen from "@/pages/sender/LoginScreen";
 import WaitingScreen from "@/pages/sender/WaitingScreen";
 import QuestionScreen from "@/pages/sender/QuestionScreen";
 import WaitingNextScreen from "@/pages/sender/WaitingNextScreen";
+import PreAnsweringScreen from "@/pages/sender/PreAnsweringScreen";
 
 const Sender = () => {
 	const { idSession } = useParams();
@@ -113,7 +114,7 @@ const Sender = () => {
 			<div className="py-2">
 				<div className="col-11 col-sm-8 h-100 m-auto p-0 bg-white text-primary rounded">
 					{state.status == STATUS.WAITING_VIEWER && <WaitingScreen />}
-					{state.status == STATUS.PRE_ANSWERING && <div>3, 2, 1...</div>}
+					{state.status == STATUS.PRE_ANSWERING && <PreAnsweringScreen />}
 					{state.status == STATUS.ANSWERING && <QuestionScreen question={state.question} sendAnswer={sendAnswer} />}
 					{state.status == STATUS.POST_ANSWERING && <div>Tempo finito ecco il risultato</div>}
 					{state.status == STATUS.WAITING_NEXT_QUESTION && <WaitingNextScreen />}
