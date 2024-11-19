@@ -1,20 +1,19 @@
 {
-	"title": "Il mio poll",
-	"mode": "poll",
+	"title": "Il mio quiz",
+	"mode": "quiz",
 	"questions": [
 		{
 			"type": "choose",
-			"multipleAnswer": false,
+			"time": 10000,
 			"question": "Scegli",
 			"a": { "text": "A" },
 			"b": { "text": "A" },
 			"c": { "text": "A" },
 			"d": { "text": "A" }
-		},
-		{
+		},{
 			"type": "choose",
-			"multipleAnswer": false,
-			"question": "ScegliB",
+			"time": 10000,
+			"question": "Scegli1",
 			"a": { "text": "A" },
 			"b": { "text": "A" },
 			"c": { "text": "A" },
