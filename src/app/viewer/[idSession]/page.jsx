@@ -9,6 +9,7 @@ import { reducer, initialState, ACTIONS, STATUS } from './reducer';
 import "./../../style.css";
 import WaitingScreen from "@/pages/viewer/WaitingScreen";
 import PreAnsweringScreen from "@/pages/viewer/PreAnsweringScreen";
+import ViewerController from "@/components/ViewerController";
 
 const Viewer = () => {
 	const { idSession } = useParams();
@@ -77,60 +78,87 @@ const Viewer = () => {
 	}, [state.data.title, state.socket]);
 
 
-	const startQuestion = (index) => {
+	const emitStartQuestion = (index) => {
 		state.socket.emit("start question", index);
 	}
-	const stopQuestion = (index) => {
+
+	const emitStopQuestion = (index) => {
 		state.socket.emit("stop question", index);
 	}
 
+
+	const stopQuestion = () => {
+		if(state.status != STATUS.ANSWERING) 
+			return;
+		dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.POST_ANSWERING });
+		emitStopQuestion(state.question);
+	}
+
+	const prevQuestion = () => {
+		if(state.question < 0) 
+			return;
+	
+		if(state.status == STATUS.POST_ANSWERING) {
+			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.ANSWERING });
+			return;
+		}
+
+		if(state.status == STATUS.ANSWERING) {
+			if(state.question == 0)
+				return;
+			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.POST_ANSWERING });
+			updateQuestion(state.question - 1)
+			return;
+		}
+	}
+
+	const nextQuestion = () => {
+		if(state.status == STATUS.ANSWERING) {
+			emitStopQuestion(state.question);
+			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.POST_ANSWERING });
+			return;
+		}
+		if(state.status == STATUS.POST_ANSWERING) {
+			// TODO: SE SONO FINETE VADO IN UNO STATO END
+			updateQuestion(state.question + 1)
+			return;
+		}
+	}
+
 	const updateQuestion = (index) => {
-		// index è >= 0
 		state.socket.emit("change question", index);
 		dispatch({ type: ACTIONS.SET_QUESTION, payload: index });
 		
 		if (state.data.mode == "poll") {
 			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.ANSWERING });
-			startQuestion(index);
+			emitStartQuestion(index);
 		}
 		if (state.data.mode == "quiz") {
 			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.PRE_ANSWERING });
 			setTimeout(()=> {
 				dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.ANSWERING });
-				startQuestion(index);
+				emitStartQuestion(index);
 				
 				let t = state.data.questions[index].time;
 
 				if(t > 0){
 					setTimeout(()=> {
-						stopQuestion(index);
-						dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.POST_ANSWERING });	
+						if(state.status == STATUS.ANSWERING) {
+							emitStopQuestion(index);
+							dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.POST_ANSWERING });
+						}
 					}, t);
 				}
 			}, 4500);
 		}
 	};
 
-	const questionPage = () => (
-		<div>
-			<button onClick={() => {
-				if(state.question == 0) return;
-				updateQuestion(state.question - 1)
-			}}>
-				PREC
-			</button>
-			{state.data.questions[state.question]?.type}
-			<button onClick={() => updateQuestion(state.question + 1)}>
-				NEXT
-			</button>
+	const questionPage = (state) => {
+		return (<div>
 			{JSON.stringify(state.data.questions[state.question])}
-
 			SE SIAMO IN POOLMODE
-			<button onClick={() => stopQuestion(state.question)}>
-				STOP
-			</button>
-		</div>
-	);
+		</div>);
+	};
 
 	return (
 		<div className="w-100 h-100 d-flex flex-column">
@@ -138,7 +166,7 @@ const Viewer = () => {
 				<h1>{state.data.title}</h1>
 			</nav>
 			<div className="py-2">
-				<div className="col-11 col-sm-8 h-100 m-auto p-0 bg-white text-primary rounded">
+				<div className="col-11 col-sm-8 h-100 m-auto p-0 bg-white text-primary rounded d-flex flex-column justify-content-between">
 					{state.status == STATUS.WAITING_SENDERS && <WaitingScreen 
 						state={state} 
 						start={() => {
@@ -146,8 +174,14 @@ const Viewer = () => {
 						}} 
 					/>}
 					{state.status == STATUS.PRE_ANSWERING && <PreAnsweringScreen />}
-					{state.status == STATUS.ANSWERING && questionPage()}
+					{state.status == STATUS.ANSWERING && questionPage(state)}
 					{state.status == STATUS.POST_ANSWERING && <div>Ecco i risultati..</div>}
+					<ViewerController 
+						state={state}
+						prevQuestion={prevQuestion}
+						stopQuestion={stopQuestion}
+						nextQuestion={nextQuestion}
+					/>
 				</div>
 			</div>
 		</div>
