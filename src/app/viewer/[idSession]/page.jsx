@@ -95,6 +95,9 @@ const Viewer = () => {
 	}
 
 	const prevQuestion = () => {
+		if (state.data.mode == "quiz")
+			return;
+
 		if(state.question < 0) 
 			return;
 	
@@ -114,8 +117,7 @@ const Viewer = () => {
 
 	const nextQuestion = () => {
 		if(state.status == STATUS.ANSWERING) {
-			emitStopQuestion(state.question);
-			dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.POST_ANSWERING });
+			stopQuestion();
 			return;
 		}
 		if(state.status == STATUS.POST_ANSWERING) {
@@ -139,15 +141,13 @@ const Viewer = () => {
 				dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.ANSWERING });
 				emitStartQuestion(index);
 				
-				let t = state.data.questions[index].time;
+				let duration = state.data.questions[index].time;
 
-				if(t > 0){
-					setTimeout(()=> {
-						if(state.status == STATUS.ANSWERING) {
-							emitStopQuestion(index);
-							dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.POST_ANSWERING });
-						}
-					}, t);
+				if(duration > 0){
+					setTimeout(function () {
+						emitStopQuestion(index);
+						dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.POST_ANSWERING });
+					}, duration);
 				}
 			}, 4500);
 		}

@@ -22,7 +22,7 @@ export default function ({ state, prevQuestion, stopQuestion, nextQuestion }) {
                 <FaAngleLeft 
                     onClick={disablePrev ? () => {} : prevQuestion} 
                     color={disablePrev ? "gray" : "black"} 
-                    style={disablePrev ? {} : {cursor: 'pointer'}}
+                    style={data.mode == "quiz" ? { visibility: 'hidden' } : (disablePrev ? {} : {cursor: 'pointer'})}
                     size={25}
                 />
                 <FaStop 
