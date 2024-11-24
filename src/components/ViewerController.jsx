@@ -9,6 +9,7 @@ export default function ({ state, prevQuestion, stopQuestion, nextQuestion }) {
         STATUS.INITIAL,
         STATUS.WAITING_SENDERS,
         STATUS.PRE_ANSWERING,
+        STATUS.END,
     ].includes(status))
         return "";
 

@@ -121,7 +121,10 @@ const Viewer = () => {
 			return;
 		}
 		if(state.status == STATUS.POST_ANSWERING) {
-			// TODO: SE SONO FINETE VADO IN UNO STATO END
+			if(state.question == state.data.questions.length - 1) {
+				dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.END });
+				return;
+			}
 			updateQuestion(state.question + 1)
 			return;
 		}
@@ -153,7 +156,8 @@ const Viewer = () => {
 		}
 	};
 
-	const questionPage = (state) => {
+	const questionPage = () => {
+		debugger;
 		return (<div>
 			{JSON.stringify(state.data.questions[state.question])}
 			SE SIAMO IN POOLMODE
@@ -167,6 +171,7 @@ const Viewer = () => {
 			</nav>
 			<div className="py-2">
 				<div className="col-11 col-sm-8 h-100 m-auto p-0 bg-white text-primary rounded d-flex flex-column justify-content-between">
+					
 					{state.status == STATUS.WAITING_SENDERS && <WaitingScreen 
 						state={state} 
 						start={() => {
@@ -176,6 +181,8 @@ const Viewer = () => {
 					{state.status == STATUS.PRE_ANSWERING && <PreAnsweringScreen />}
 					{state.status == STATUS.ANSWERING && questionPage(state)}
 					{state.status == STATUS.POST_ANSWERING && <div>Ecco i risultati..</div>}
+					{state.status == STATUS.END && <div>FINE</div>}
+
 					<ViewerController 
 						state={state}
 						prevQuestion={prevQuestion}

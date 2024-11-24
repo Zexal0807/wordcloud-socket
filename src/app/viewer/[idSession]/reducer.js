@@ -4,6 +4,7 @@ export const STATUS = {
     PRE_ANSWERING: "preanswering",
 	ANSWERING: "answering",
     POST_ANSWERING: "postanswering",
+    END: "end",
 };
 
 export const ACTIONS = {
