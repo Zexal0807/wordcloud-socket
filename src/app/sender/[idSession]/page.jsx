@@ -7,11 +7,12 @@ import { useParams, useRouter } from "next/navigation";
 import { reducer, initialState, ACTIONS, STATUS } from './reducer';
 
 import "./../../style.css";
-import LoginScreen from "@/pages/sender/LoginScreen";
-import WaitingScreen from "@/pages/sender/WaitingScreen";
+
+import LoginScreen from "@/components/screens/LoginScreen";
+import WaitingScreen from "@/components/screens/WaitingScreen";
+import PreAnsweringScreen from "@/components/screens/PreAnsweringScreen";
 import QuestionScreen from "@/pages/sender/QuestionScreen";
-import WaitingNextScreen from "@/pages/sender/WaitingNextScreen";
-import PreAnsweringScreen from "@/pages/sender/PreAnsweringScreen";
+import WaitingNextScreen from "@/components/screens/WaitingNextScreen";
 
 const Sender = () => {
 	const { idSession } = useParams();
@@ -92,6 +93,7 @@ const Sender = () => {
 	if (state.status == STATUS.LOGGING) {
 		return (
 			<LoginScreen
+			type={"sender"}
 				name={state.name}
 				setName={(name) =>
 					dispatch({ type: ACTIONS.SET_NAME, payload: name })
@@ -113,11 +115,22 @@ const Sender = () => {
 			</nav>
 			<div className="py-2">
 				<div className="col-11 col-sm-8 h-100 m-auto p-0 bg-white text-primary rounded">
-					{state.status == STATUS.WAITING_VIEWER && <WaitingScreen />}
-					{state.status == STATUS.PRE_ANSWERING && <PreAnsweringScreen />}
-					{state.status == STATUS.ANSWERING && <QuestionScreen question={state.question} sendAnswer={sendAnswer} />}
+					{state.status == STATUS.WAITING_VIEWER && <WaitingScreen 
+						type={"sender"}
+					/>}
+					{state.status == STATUS.PRE_ANSWERING && <PreAnsweringScreen 
+						type={"sender"}
+					/>}
+					{state.status == STATUS.ANSWERING && <QuestionScreen 
+						type={"sender"}
+						state={state}
+						question={state.question} 
+						sendAnswer={sendAnswer} 
+					/>}
 					{state.status == STATUS.POST_ANSWERING && <div>Tempo finito ecco il risultato</div>}
-					{state.status == STATUS.WAITING_NEXT_QUESTION && <WaitingNextScreen />}
+					{state.status == STATUS.WAITING_NEXT_QUESTION && <WaitingNextScreen 
+						type={"sender"}
+					/>}
 				</div>
 			</div>
 		</div>

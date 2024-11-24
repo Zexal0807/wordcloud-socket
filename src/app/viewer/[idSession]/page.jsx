@@ -7,8 +7,9 @@ import { useParams, useRouter } from "next/navigation";
 import { reducer, initialState, ACTIONS, STATUS } from './reducer';
 
 import "./../../style.css";
-import WaitingScreen from "@/pages/viewer/WaitingScreen";
-import PreAnsweringScreen from "@/pages/viewer/PreAnsweringScreen";
+
+import WaitingScreen from "@/components/screens/WaitingScreen";
+import PreAnsweringScreen from "@/components/screens/PreAnsweringScreen";
 import ViewerController from "@/components/ViewerController";
 
 const Viewer = () => {
@@ -173,12 +174,15 @@ const Viewer = () => {
 				<div className="col-11 col-sm-8 h-100 m-auto p-0 bg-white text-primary rounded d-flex flex-column justify-content-between">
 					
 					{state.status == STATUS.WAITING_SENDERS && <WaitingScreen 
-						state={state} 
+						type={"viewer"}
+						state={state}
 						start={() => {
 							updateQuestion(0)
 						}} 
 					/>}
-					{state.status == STATUS.PRE_ANSWERING && <PreAnsweringScreen />}
+					{state.status == STATUS.PRE_ANSWERING && <PreAnsweringScreen 
+						type={"viewer"}
+					/>}
 					{state.status == STATUS.ANSWERING && questionPage(state)}
 					{state.status == STATUS.POST_ANSWERING && <div>Ecco i risultati..</div>}
 					{state.status == STATUS.END && <div>FINE</div>}
