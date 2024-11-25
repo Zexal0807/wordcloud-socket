@@ -1,6 +1,6 @@
 import Logo from "@/components/Logo";
 
-export default function LoginScreen({ name, setName, join }) {
+export default function LoginScreen({ state, setName, join }) {
 	
 	return (
 		<>
@@ -13,7 +13,7 @@ export default function LoginScreen({ name, setName, join }) {
 					</label>
 					<input
 						className="w-100 text-center rounded-top p-3 p-sm-1 border border-secondary h1 m-0"
-						value={name}
+						value={state.name}
 						onChange={(e) => setName(e.target.value)}
 					/>
 

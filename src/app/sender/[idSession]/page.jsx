@@ -93,11 +93,9 @@ const Sender = () => {
 	if (state.status == STATUS.LOGGING) {
 		return (
 			<LoginScreen
-			type={"sender"}
-				name={state.name}
-				setName={(name) =>
-					dispatch({ type: ACTIONS.SET_NAME, payload: name })
-				}
+				type={"sender"}
+				state={state}
+				setName={(name) => dispatch({ type: ACTIONS.SET_NAME, payload: name }) }
 				join={() => {
 					if (state.name) {
 						const socket = io(process.env.HOST);
