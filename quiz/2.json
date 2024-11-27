@@ -3,21 +3,27 @@
 	"mode": "quiz",
 	"questions": [
 		{
-			"type": "choose",
+			"type": "single-choose",
 			"time": 10000,
 			"question": "Scegli",
-			"a": { "text": "A" },
-			"b": { "text": "A" },
-			"c": { "text": "A" },
-			"d": { "text": "A" }
+			"options": [
+				{ "text": "A" },
+				{ "text": "A" },
+				{ "text": "A" },
+				{ "text": "A" }
+			],
+			"solutions": 0
 		},{
-			"type": "choose",
+			"type": "single-choose",
 			"time": 10000,
 			"question": "Scegli1",
-			"a": { "text": "A" },
-			"b": { "text": "A" },
-			"c": { "text": "A" },
-			"d": { "text": "A" }
+			"options": [
+				{ "text": "A" },
+				{ "text": "A" },
+				{ "text": "A" },
+				{ "text": "A" }
+			],
+			"solutions": 0
 		}
 	]
 }
