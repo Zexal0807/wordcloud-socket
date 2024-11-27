@@ -25,12 +25,11 @@ export default function () {
 
 	return (
 		<div className="h-100 d-flex flex-column justify-content-center align-items-center">
-			
 			<div className="countContainer">
-				<h1 className={`count animate-text`}>
+				<h1 className="count animate-text">
 					{count >= 0 ? count : ""}
 				</h1>
-				<h1 className={`count`}>
+				<h1 className="count">
 					{count > 0 ? count : 0}
 				</h1>
 			</div>

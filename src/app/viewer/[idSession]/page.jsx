@@ -11,6 +11,7 @@ import "./../../style.css";
 import WaitingScreen from "@/components/screens/WaitingScreen";
 import PreAnsweringScreen from "@/components/screens/PreAnsweringScreen";
 import ViewerController from "@/components/ViewerController";
+import QuestionScreen from "@/components/screens/QuestionScreen";
 
 const Viewer = () => {
 	const { idSession } = useParams();
@@ -151,7 +152,7 @@ const Viewer = () => {
 					setTimeout(function () {
 						emitStopQuestion(index);
 						dispatch({ type: ACTIONS.SET_STATUS, payload: STATUS.POST_ANSWERING });
-					}, duration);
+					}, duration + 250);
 				}
 			}, 4500);
 		}
@@ -183,7 +184,10 @@ const Viewer = () => {
 					{state.status == STATUS.PRE_ANSWERING && <PreAnsweringScreen 
 						type={"viewer"}
 					/>}
-					{state.status == STATUS.ANSWERING && questionPage(state)}
+					{state.status == STATUS.ANSWERING && <QuestionScreen 
+						type={"viewer"}
+						state={state}
+					/>}
 					{state.status == STATUS.POST_ANSWERING && <div>Ecco i risultati..</div>}
 					{state.status == STATUS.END && <div>FINE</div>}
 
