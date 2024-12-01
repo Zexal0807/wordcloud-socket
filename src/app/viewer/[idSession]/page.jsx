@@ -158,14 +158,6 @@ const Viewer = () => {
 		}
 	};
 
-	const questionPage = () => {
-		debugger;
-		return (<div>
-			{JSON.stringify(state.data.questions[state.question])}
-			SE SIAMO IN POOLMODE
-		</div>);
-	};
-
 	return (
 		<div className="w-100 h-100 d-flex flex-column">
 			<nav className="col-11 col-sm-8 text-center bg-white text-primary rounded-bottom d-flex align-items-center justify-content-center m-auto">

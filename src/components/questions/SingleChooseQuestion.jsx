@@ -1,4 +1,8 @@
 export default function ({ mode, type, question, sendAnswer }) {
+
+    const { options } = question;
+    debugger;
+
 	if (type == "sender" && mode == "quiz") 
         return (<button
             onClick={() => {
@@ -9,7 +13,7 @@ export default function ({ mode, type, question, sendAnswer }) {
         </button>
         );
 
-    if (type == "sender" && mode == "pool") 
+    if (type == "sender" && mode == "poll") 
         return (<button
             onClick={() => {
                 sendAnswer(1);
@@ -20,10 +24,14 @@ export default function ({ mode, type, question, sendAnswer }) {
         );
 
 	if (type == "viewer" && mode == "quiz") 
-        return <div className="w-100 h-100">
+        return (<div className="w-100 h-100">
+            VQ
+        </div>);
 
-        </div>;
+    if (type == "viewer" && mode == "poll") 
+        return (<div className="w-100 h-100">
+            VP
+        </div>);
 
-    if (type == "viewer" && mode == "pool") 
-        return <></>;
+    return <></>;
 }

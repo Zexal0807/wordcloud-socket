@@ -11,7 +11,7 @@ import "./../../style.css";
 import LoginScreen from "@/components/screens/LoginScreen";
 import WaitingScreen from "@/components/screens/WaitingScreen";
 import PreAnsweringScreen from "@/components/screens/PreAnsweringScreen";
-import QuestionScreen from "@/pages/sender/QuestionScreen";
+import QuestionScreen from "@/components/screens/QuestionScreen";
 import WaitingNextScreen from "@/components/screens/WaitingNextScreen";
 
 const Sender = () => {
@@ -122,7 +122,6 @@ const Sender = () => {
 					{state.status == STATUS.ANSWERING && <QuestionScreen 
 						type={"sender"}
 						state={state}
-						question={state.question} 
 						sendAnswer={sendAnswer} 
 					/>}
 					{state.status == STATUS.POST_ANSWERING && <div>Tempo finito ecco il risultato</div>}
