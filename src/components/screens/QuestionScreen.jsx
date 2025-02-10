@@ -1,5 +1,5 @@
 import SingleChooseQuestion from "../questions/SingleChooseQuestion";
-import QuestionTimer from "../QuestionTimer";
+import QuestionTimer from "../QuestionTimer/QuestionTimer";
 
 const QuestionFactory = ({ type, mode, question, sendAnswer }) => {
 	switch(question.type) {
@@ -26,7 +26,6 @@ export default function ({ type, state, sendAnswer }) {
 				className="d-flex justify-content-center fs-4 p-2"
 				style={{ height: "10%" }}
 			>
-				Quanti megapixel ha uno schermo di medie dimensione
 				{questionData.question}
 			</div>
 			<div 
