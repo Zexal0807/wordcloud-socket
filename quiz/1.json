@@ -8,9 +8,9 @@
 			"question": "Scegli",
 			"options": [
 				{ "text": "A" },
-				{ "text": "A" },
-				{ "text": "A" },
-				{ "text": "A" }
+				{ "text": "B" },
+				{ "text": "C" },
+				{ "text": "D" }
 			],
 			"solutions": 0
 		},
@@ -20,9 +20,9 @@
 			"question": "ScegliB",
 			"options": [
 				{ "text": "A" },
-				{ "text": "A" },
-				{ "text": "A" },
-				{ "text": "A" }
+				{ "text": "B" },
+				{ "text": "C" },
+				{ "text": "D" }
 			],
 			"solutions": 0
 		}
